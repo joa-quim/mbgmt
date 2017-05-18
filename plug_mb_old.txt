@@ -1,0 +1,89 @@
+set (MB_SUPPL_DIRS mb)
+
+# Support code for the modules: (Needed in mbgmtlib)
+set (MB_SUPPL_SRCS mb/mbgmt_module.h mb/mbgmt_module.c)
+
+# process supplement directories
+if (UNIX)
+	set (CMAKE_SHARED_MODULE_SUFFIX .so)
+endif (UNIX)
+foreach (_dir ${MB_SUPPL_DIRS})
+	add_subdirectory (${_dir})
+	list (APPEND GMT_BINARY_DIR_PATH
+		"${CMAKE_CURRENT_BINARY_DIR}/${_dir}/\${CMAKE_CONFIG_TYPE:-.}")
+endforeach (_dir)
+# supplement library files
+get_subdir_var_files (MB_SUPPL_LIB_SRCS LIB_SRCS ${MB_SUPPL_DIRS})
+
+# include supplement directories
+foreach (_dir ${MB_SUPPL_DIRS})
+	include_directories (${CMAKE_CURRENT_BINARY_DIR}/${_dir})
+endforeach (_dir)
+
+include_directories(${ONCRPCINC})
+include_directories(${GETOPTINC})
+include_directories(${PROJINCDIR})
+include_directories(${MBINC})
+
+if (WIN32)
+	add_library (mbgmtlib
+		${GMT_GEN_HDRS}
+		${MB_SUPPL_SRCS}
+		${MB_SUPPL_LIB_SRCS})
+else (WIN32)
+	add_library (mbgmtlib MODULE
+		${GMT_GEN_HDRS}
+		${MB_SUPPL_SRCS}
+		${MB_SUPPL_LIB_SRCS})
+endif (WIN32)
+
+add_dependencies (mbgmtlib gen_gmt_headers) # make mbgmtlib after gen_gmt_headers
+add_dependencies (mbgmtlib pslib) # make mbgmtlib after pslib
+add_dependencies (mbgmtlib gmtlib) # make mbgmtlib after pslib
+
+# No SOVERSION & VERSION for a MODULE, only for SHARED libs
+target_link_libraries (mbgmtlib
+	gmtlib pslib
+	${PROJLIB} ${ONCRPCLIB} ${GETOPTLIB} ${MBIOLIB} ${MBAUXLIB} 
+	)
+
+set_target_properties (mbgmtlib
+	PROPERTIES
+	OUTPUT_NAME supplements
+	RUNTIME_OUTPUT_NAME supplements
+	LIBRARY_OUTPUT_DIRECTORY plugins
+	RUNTIME_OUTPUT_DIRECTORY plugins
+	PREFIX ""
+	LINK_FLAGS "${USER_GMTLIB_LINK_FLAGS}"
+	DEFINE_SYMBOL "LIBRARY_EXPORTS")
+
+if (WIN32 AND MB_DLL_RENAME)
+	set_target_properties (mbgmtlib PROPERTIES RUNTIME_OUTPUT_NAME ${MB_DLL_RENAME})
+endif ()
+
+if (HAVE_DLADDR AND HAVE_LIBDL)
+	# link the dynamic linking loader library
+	target_link_libraries (mbgmtlib dl)
+endif (HAVE_DLADDR AND HAVE_LIBDL)
+
+if (HAVE_M_LIBRARY)
+	# link the math library
+	target_link_libraries (mbgmtlib m)
+endif (HAVE_M_LIBRARY)
+
+# install target
+install (TARGETS mbgmtlib
+	LIBRARY DESTINATION ${GMT_LIBDIR}/gmt${GMT_INSTALL_NAME_SUFFIX}/plugins # UNIX
+	COMPONENT Runtime
+	RUNTIME DESTINATION ${GMT_BINDIR}/gmt_plugins # Windows
+	COMPONENT Runtime)
+
+
+# generate and install Mac/Windows debugging symbols
+if (WIN32)
+	create_debug_sym (${GMT_BINDIR}/gmt_plugins mbgmtlib)
+else (WIN32)
+	create_debug_sym (${GMT_LIBDIR}/gmt${GMT_INSTALL_NAME_SUFFIX}/plugins mbgmtlib)
+endif (WIN32)
+
+add_dependencies (check ${_gmt_progs} mbgmtlib)
