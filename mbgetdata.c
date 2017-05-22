@@ -49,8 +49,6 @@ GMT_LOCAL struct ping_local {
 	double *sslon;
 	double *sslat;
 	char	comment[256];
-	int    *bathflag;
-	int    *ssflag;
 };
 
 /* Control structure for mbgetdata */
@@ -69,14 +67,13 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 	void   *mbio_ptr;
 	struct  ping_local data;
 
+	struct mbgetdata_A {	/* -A apply flags */
+		bool active;
+	} A;
 	struct mbgetdata_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
 		bool active;
 		int time_i[7];
 	} b;
-	struct mbgetdata_C {	/* -C<cptfile> */
-		bool active;
-		char *cptfile;
-	} C;
 	struct mbgetdata_D {	/* -D<mode>/<ampscale>/<ampmin>/<ampmax> */
 		bool active;
 		unsigned int mode;
@@ -125,9 +122,7 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 	} T;
 	struct mbgetdata_Z {	/* -Z<mode> */
 		bool active;
-		int mode;
-		int filter;
-		int usefiltered;
+		char *file;
 	} Z;
 };
 
@@ -167,10 +162,10 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 
 GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
-	if (Ctrl->C.cptfile) free (Ctrl->C.cptfile);
 	if (Ctrl->I.file) free (Ctrl->I.file);
 	if (Ctrl->M.file) free (Ctrl->M.file);
 	if (Ctrl->N.file) free (Ctrl->N.file);
+	if (Ctrl->Z.file) free (Ctrl->Z.file);
 	gmt_M_free (GMT, Ctrl);
 }
 
@@ -250,10 +245,8 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 					n_errors++;
 				}
 				break;
-			case 'C':	/* CPT file */
-				Ctrl->C.active = true;
-				if (Ctrl->C.cptfile) free (Ctrl->C.cptfile);
-				Ctrl->C.cptfile = strdup (opt->arg);
+			case 'A':	/* Apply flags (make z nan) */
+				Ctrl->A.active = true;
 				break;
 			case 'D':	/* amplitude scaling */
 				n = sscanf(opt->arg, "%d/%lf/%lf/%lf", &(Ctrl->D.mode), &(Ctrl->D.ampscale),
@@ -372,12 +365,14 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	uint64_t  dim[4];
 	int    n_alloc = 200;
 	char   program_name[] = "mbgetdata";
+	double NaN;
 	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL;	/* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
 	struct MBGETDATA_CTRL *Ctrl = NULL;
 	struct GMT_DATASET *D = NULL;
 	struct GMT_DATASET *D2 = NULL;
+	struct GMT_MATRIX *M = NULL;
 
 	/* MBIO status variables */
 	bool   done = false, read_data = false;
@@ -390,6 +385,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	int    format, file_in_bounds, pings, n_pings, n_beams, col;
 	int   *index;
 	struct mb_info_struct mb_info;
+	gmt_M_make_dnan(NaN);
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
 
@@ -408,7 +404,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
 
 	/*---------------------------- This is the mbgetdata main code ----------------------------*/
-
+	
 	pings = Ctrl->p.pings;		/* If pings were set by user, prefer it */
 
 	/* set verbosity */
@@ -529,10 +525,6 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), &(Ctrl->data.sslon), &error);
 			if (error == MB_ERROR_NO_ERROR)
 				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), &(Ctrl->data.sslat), &error);
-			if (error == MB_ERROR_NO_ERROR)
-				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(int), &(Ctrl->data.bathflag), &error);
-			if (error == MB_ERROR_NO_ERROR)
-				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(int), &(Ctrl->data.ssflag), &error);
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
@@ -580,6 +572,11 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 						D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
 						D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
 						D->table[0]->segment[2]->data[col][n_pings] = -Ctrl->data.bath[col];
+					}
+					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN */
+						for (col = 0; col < n_beams; col++) {
+							if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] = NaN;
+						}
 					}
 					n_pings++;
 				}

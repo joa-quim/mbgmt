@@ -61,7 +61,6 @@ install (PROGRAMS
 	${PATO_BIN}/mbsvplist.exe
 	${PATO_BIN}/mbswplspreprocess.exe
 	${PATO_BIN}/mbtime.exe
-	${PATO_BIN}/mbvelocitytool.exe
 	${PATO_BIN}/mbm_bpr
 	${PATO_BIN}/mbm_copy
 	${PATO_BIN}/mbm_grd2geovrml

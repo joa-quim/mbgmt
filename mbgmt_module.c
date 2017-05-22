@@ -50,6 +50,7 @@ struct Gmt_moduleinfo g_mbgmt_module[] = {
 	{"mbgetdata", "mbgmt", "Get swath bathymetry, amplitude, or backscatter data into Matlab", "<D{,ND),MD}"},
 	{"mbinfo_j",  "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>T},>DC"},
 	{"mbflags",   "mbgmt", "Update the flags .esf file from external file", ""},
+	{"mbset",     "mbgmt", "Set values in an mbprocess parameter file", ""},
 	{NULL, NULL, NULL} /* last element == NULL detects end of array */
 };
 
