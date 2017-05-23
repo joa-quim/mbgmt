@@ -38,7 +38,7 @@ EXTERN_MSC int GMT_mbgrdtiff (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbclean_j (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbimport  (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbgetdata (void *API, int mode, void *args);
-EXTERN_MSC int GMT_mbinfo_j  (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbinfo    (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbflags   (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbset     (void *API, int mode, void *args);
 
