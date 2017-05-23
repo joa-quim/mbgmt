@@ -27,7 +27,7 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbinfo_j"
+#define THIS_MODULE_NAME	"mbinfo"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Read a swath sonar data file and outputs some basic statistics."
 #define THIS_MODULE_KEYS	"<D{,>T},>DC" 
@@ -35,9 +35,9 @@
 /* GMT5 header file */
 #include "gmt_dev.h"
 
-EXTERN_MSC int GMT_mbinfo_j(void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbinfo(void *API, int mode, void *args);
 
-#define GMT_PROG_OPTIONS "->BJRUV" GMT_OPT("S")
+#define GMT_PROG_OPTIONS "->RUV"
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -153,7 +153,7 @@ static char rcs_id[] = "$Id: mbinfo.c 2298 2017-04-10 07:57:48Z caress $";
 #define bailout(code) {gmt_M_free_options (mode); return (code);}
 #define Return(code) {Free_Ctrl (GMT, Ctrl); gmt_end_module (GMT, GMT_cpy); bailout (code);}
 
-int GMT_mbinfo_j (void *V_API, int mode, void *args) {
+int GMT_mbinfo(void *V_API, int mode, void *args) {
 	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL;	/* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
