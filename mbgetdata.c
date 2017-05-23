@@ -60,7 +60,6 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 	int     read_datalist;
 	void	*datalist;
 	double	file_weight;
-	mb_path file;
 	int     beams_bath_max;
 	int     beams_amp_max;
 	int     pixels_ss_max;
@@ -69,6 +68,7 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 
 	struct mbgetdata_A {	/* -A apply flags */
 		bool active;
+		double value;
 	} A;
 	struct mbgetdata_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
 		bool active;
@@ -154,7 +154,6 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	/* mbswath variables */
 	Ctrl->read_datalist = MB_NO;
 	Ctrl->datalist = NULL;
-	Ctrl->file[0] = '\0';
 	Ctrl->mbio_ptr = NULL;
 
 	return (Ctrl);
@@ -247,6 +246,7 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 				break;
 			case 'A':	/* Apply flags (make z nan) */
 				Ctrl->A.active = true;
+				if (opt->arg) Ctrl->A.value = atof(opt->arg);
 				break;
 			case 'D':	/* amplitude scaling */
 				n = sscanf(opt->arg, "%d/%lf/%lf/%lf", &(Ctrl->D.mode), &(Ctrl->D.ampscale),
@@ -270,7 +270,6 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 					n_errors++;
 				}
 				break;
-			case 'f':	/* format */
 			case 'F':	/* format */
 				n = sscanf(opt->arg, "%d", &(Ctrl->F.format));
 				if (n == 1)
@@ -573,9 +572,15 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 						D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
 						D->table[0]->segment[2]->data[col][n_pings] = -Ctrl->data.bath[col];
 					}
-					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN */
-						for (col = 0; col < n_beams; col++) {
-							if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] = NaN;
+					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN or add a cte value */
+						if (Ctrl->A.value) {
+							for (col = 0; col < n_beams; col++)
+								if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] += Ctrl->A.value;
+						}
+						else {
+							for (col = 0; col < n_beams; col++) {
+								if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] = NaN;
+							}
 						}
 					}
 					n_pings++;
