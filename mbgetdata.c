@@ -381,7 +381,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	char  *message = NULL;
 
 	char   file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""};
-	int    format, file_in_bounds, pings, n_pings, n_beams, col;
+	int    format, file_in_bounds, pings, n_pings, n_beams, n_beams_max, col;
 	int   *index;
 	struct mb_info_struct mb_info;
 	gmt_M_make_dnan(NaN);
@@ -506,6 +506,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				GMT_Report(API, GMT_MSG_NORMAL,"\nProgram <%s> Terminated\n", program_name);
 				Return(error);
 			}
+			n_beams_max = Ctrl->beams_bath_max;
 
 			/* allocate memory for data arrays */
 			if (error == MB_ERROR_NO_ERROR)
@@ -554,7 +555,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 					error = MB_ERROR_NO_ERROR;
 					n_beams = Ctrl->data.beams_bath;
 					if (n_pings == 0) {
-						dim[0] = 1;		dim[1] = 3;		dim[2] = n_alloc;		dim[3] = n_beams;
+						n_beams_max = MAX(n_beams_max, n_beams);
+						dim[0] = 1;		dim[1] = 3;		dim[2] = n_alloc;		dim[3] = n_beams_max;
 						if ((D = GMT_Create_Data(API, GMT_IS_DATASET, GMT_IS_POINT, GMT_CONTAINER_AND_DATA,
 						                         dim, NULL, NULL, 0, 0, NULL)) == NULL) {
 							GMT_Report(API, GMT_MSG_NORMAL, "Could not create Matrix structure\n");
@@ -563,14 +565,19 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 					}
 					if (n_pings >= n_alloc) {
 						n_alloc = (int)(1.7 * n_alloc);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams, NULL, D->table[0]->segment[0]);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams, NULL, D->table[0]->segment[1]);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams, NULL, D->table[0]->segment[2]);
+						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
+						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
+						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 					}
 					for (col = 0; col < n_beams; col++) {
 						D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
 						D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
 						D->table[0]->segment[2]->data[col][n_pings] = -Ctrl->data.bath[col];
+					}
+					for (col = n_beams; col < n_beams_max; col++) {		/* NaNify the remaining beams of this ping */
+						D->table[0]->segment[0]->data[col][n_pings] = NaN;
+						D->table[0]->segment[1]->data[col][n_pings] = NaN;
+						D->table[0]->segment[2]->data[col][n_pings] = NaN;
 					}
 					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN or add a cte value */
 						if (Ctrl->A.value) {
@@ -588,9 +595,9 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				else if (error > MB_ERROR_NO_ERROR)
 					done = true;
 			}
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams, NULL, D->table[0]->segment[0]);
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams, NULL, D->table[0]->segment[1]);
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams, NULL, D->table[0]->segment[2]);
+			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
+			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
+			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 			mb_close(verbose,&Ctrl->mbio_ptr,&error);
 			index[n_files] = n_pings;		/* Store the index at which a new file comes in contributing to out data */
 			n_files++;

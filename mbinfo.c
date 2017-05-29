@@ -189,8 +189,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	double	file_weight;
 	int	format, pings, lonflip;
 	double	bounds[4];
-	int	btime_i[7];
-	int	etime_i[7];
+	int	btime_i[7], etime_i[7];
 	double	btime_d, etime_d, speedmin, timegap;
 	char	file[MB_PATH_MAXLINE], dfile[MB_PATH_MAXLINE];
 	int	pings_get = 1;
@@ -403,109 +402,6 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	/* set default input to stdin */
 	strcpy (read_file, "stdin");
 
-#if 0
-	/* process argument list */
-	  while ((c = getopt(argc, argv, "VvHhB:b:CcE:e:F:f:GgI:i:L:l:M:m:NnOoP:p:R:r:S:s:T:t:WwX:x:")) != -1)
-	  switch (c) {
-		case 'B':
-		case 'b':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d", &btime_i[0],&btime_i[1],&btime_i[2], &btime_i[3],&btime_i[4],&btime_i[5]);
-			btime_i[6] = 0;
-			flag++;
-			break;
-		case 'C':
-		case 'c':
-			comments = MB_YES;
-			flag++;
-			break;
-		case 'E':
-		case 'e':
-			sscanf (optarg,"%d/%d/%d/%d/%d/%d", &etime_i[0],&etime_i[1],&etime_i[2], &etime_i[3],&etime_i[4],&etime_i[5]);
-			etime_i[6] = 0;
-			flag++;
-			break;
-		case 'F':
-		case 'f':
-			sscanf (optarg,"%d", &format);
-			flag++;
-			break;
-		case 'G':
-		case 'g':
-			good_nav_only = MB_YES;
-			flag++;
-			break;
-		case 'H':
-		case 'h':
-			help++;
-			break;
-		case 'L':
-		case 'l':
-			sscanf (optarg,"%d", &lonflip);
-			lonflip_set = MB_YES;
-			lonflip_use = lonflip;
-			flag++;
-			break;
-		case 'M':
-		case 'm':
-			sscanf (optarg,"%d/%d", &mask_nx, &mask_ny);
-			coverage_mask = MB_YES;
-			flag++;
-			break;
-		case 'N':
-		case 'n':
-			print_notices = MB_YES;
-			flag++;
-			break;
-		case 'O':
-		case 'o':
-			output_usefile = MB_YES;
-			flag++;
-			break;
-		case 'P':
-		case 'p':
-			sscanf (optarg,"%d", &pings_read);
-			if (pings_read < 1)
-				pings_read = 1;
-			if (pings_read > MBINFO_MAXPINGS)
-				pings_read = MBINFO_MAXPINGS;
-			flag++;
-			break;
-		case 'R':
-		case 'r':
-			mb_get_bounds(optarg, bounds);
-			flag++;
-			break;
-		case 'S':
-		case 's':
-			sscanf (optarg,"%lf", &speedmin);
-			flag++;
-			break;
-		case 'T':
-		case 't':
-			sscanf (optarg,"%lf", &timegap);
-			flag++;
-			break;
-		case 'V':
-		case 'v':
-			verbose++;
-			break;
-		case 'W':
-		case 'w':
-			bathy_in_feet = MB_YES;
-			break;
-		case 'X':
-		case 'x':
-			sscanf (optarg,"%d",&output_format);
-			if (output_format < 0 || output_format > MAX_OUTPUT_FORMAT) {
-				errflg++;
-				fprintf(stream,"Invalid output format for inf file");
-			}
-			flag++;
-			break;
-		case '?':
-			errflg++;
-	}
-#endif
 
 	/* set output stream */
 	if (verbose <= 1)
@@ -708,8 +604,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	/* if error initializing memory then quit */
 	if (error != MB_ERROR_NO_ERROR) {
 		mb_error(verbose,error,&message);
-		fprintf(stream,"\nMBIO Error allocating data arrays:\n%s\n",message);
-		fprintf(stream,"\nProgram <%s> Terminated\n", program_name);
+		fprintf(stream,"MBIO Error allocating data arrays:\n%s\n",message);
+		fprintf(stream,"Program <%s> Terminated\n", program_name);
 		return(error);
 	}
 

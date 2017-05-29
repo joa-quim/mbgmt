@@ -41,16 +41,17 @@ struct Gmt_moduleinfo {
 };
 
 struct Gmt_moduleinfo g_mbgmt_module[] = {
-	{"mbcontour", "mbgmt", "Plot contours", ""},
-	{"mbswath",   "mbgmt", "Plot swath bathymetry, amplitude, or backscatter", ""},
-	{"mbgrdtiff", "mbgmt", "Create geotiff images", ""},
-	{"mbclean_j", "mbgmt", "Identifies and flags artifacts in swath sonar bathymetry data", ""},
-	{"mbgrid_j",  "mbgmt", "grid bathymetry, amplitude, or sidescan data of a set of swath sonar data files", ""},
-	{"mbimport",  "mbgmt", "Get swath bathymetry, amplitude, or backscatter Image into Matlab", "<D{,CC(,MI}"},
-	{"mbgetdata", "mbgmt", "Get swath bathymetry, amplitude, or backscatter data into Matlab", "<D{,ND),MD}"},
-	{"mbinfo",    "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>T},>DC"},
-	{"mbflags",   "mbgmt", "Update the flags .esf file from external file", ""},
-	{"mbset",     "mbgmt", "Set values in an mbprocess parameter file", ""},
+	{"mbareaclean", "mbgmt", "Automatically flag bad beams in swath sonar bathymetry data", ""},
+	{"mbcontour",   "mbgmt", "Plot contours", ""},
+	{"mbclean_j",   "mbgmt", "Identifies and flags artifacts in swath sonar bathymetry data", ""},
+	{"mbflags",     "mbgmt", "Update the flags .esf file from external file", ""},
+	{"mbgetdata",   "mbgmt", "Get swath bathymetry, amplitude, or backscatter data into Matlab", "<D{,ND),MD}"},
+	{"mbgrdtiff",   "mbgmt", "Create geotiff images", ""},
+	{"mbgrid_j",    "mbgmt", "grid bathymetry, amplitude, or sidescan data of a set of swath sonar data files", ""},
+	{"mbimport",    "mbgmt", "Get swath bathymetry, amplitude, or backscatter Image into Matlab", "<D{,CC(,MI}"},
+	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>T},>DC"},
+	{"mbset",       "mbgmt", "Set values in an mbprocess parameter file", ""},
+	{"mbswath",     "mbgmt", "Plot swath bathymetry, amplitude, or backscatter", ""},
 	{NULL, NULL, NULL} /* last element == NULL detects end of array */
 };
 

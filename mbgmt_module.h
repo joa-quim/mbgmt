@@ -32,15 +32,16 @@ extern "C" {
 #include "declspec.h"
 
 /* Prototypes of all modules in the GMT core library */
-EXTERN_MSC int GMT_mbswath   (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbareaclean (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbcontour (void *API, int mode, void *args);
-EXTERN_MSC int GMT_mbgrdtiff (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbclean_j (void *API, int mode, void *args);
-EXTERN_MSC int GMT_mbimport  (void *API, int mode, void *args);
-EXTERN_MSC int GMT_mbgetdata (void *API, int mode, void *args);
-EXTERN_MSC int GMT_mbinfo    (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbflags   (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbgetdata (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbgrdtiff (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbimport  (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbinfo    (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbset     (void *API, int mode, void *args);
+EXTERN_MSC int GMT_mbswath   (void *API, int mode, void *args);
 
 /* Pretty print all modules in the GMT core library and their purposes */
 EXTERN_MSC void gmt_mbgmt_module_show_all (void *API);

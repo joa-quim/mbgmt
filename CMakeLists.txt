@@ -18,7 +18,7 @@
 
 # ==> Modules in this custom library [add the ones you have]:
 set (SUPPL_PROGS_SRCS mbcontour.c mbswath.c mbgrdtiff.c mbclean_j.c mbgrid_j.c mbimport.c
-	mbgetdata.c mbflags.c mbset.c mbinfo.c)
+	mbgetdata.c mbflags.c mbset.c mbinfo.c mbareaclean.c)
 #=========================================================================
 # Most likely no changes below here
 
