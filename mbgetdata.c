@@ -554,8 +554,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {		/* ignore time gaps */
 					error = MB_ERROR_NO_ERROR;
 					n_beams = Ctrl->data.beams_bath;
+					n_beams_max = MAX(n_beams_max, n_beams);
 					if (n_pings == 0) {
-						n_beams_max = MAX(n_beams_max, n_beams);
 						dim[0] = 1;		dim[1] = 3;		dim[2] = n_alloc;		dim[3] = n_beams_max;
 						if ((D = GMT_Create_Data(API, GMT_IS_DATASET, GMT_IS_POINT, GMT_CONTAINER_AND_DATA,
 						                         dim, NULL, NULL, 0, 0, NULL)) == NULL) {
