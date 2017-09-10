@@ -323,57 +323,12 @@ int              tiff_offset[] =
 #define THIS_MODULE_NAME	"mbgrdtiff"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Project grids or images and plot them on maps"
-#define THIS_MODULE_KEYS	""
+#define THIS_MODULE_KEYS	"<G{+,CC(,IG("
+#define THIS_MODULE_NEEDS	"gJ"
+#define THIS_MODULE_OPTIONS "->JRVn" GMT_OPT("S")
 
 #include "gmt_dev.h"
-/*  Compatibility with old lower-function/macro names use prior to GMT 5.3.0 */
-#if GMT_MINOR_VERSION < 3
-#define gmt_M_180_range GMT_180_RANGE
-#define gmt_M_free_options GMT_Free_Options
-#define gmt_M_ijp GMT_IJP
-#define gmt_M_ijpgi GMT_IJPGI
-#define gmt_M_check_condition GMT_check_condition
-#define gmt_M_get_inc GMT_get_inc
-#define gmt_M_get_n GMT_get_n
-#define gmt_M_grd_is_global GMT_grd_is_global
-#define gmt_M_grd_same_region GMT_grd_same_region
-#define gmt_M_is255 GMT_is255
-#define gmt_M_is_geographic GMT_is_geographic
-#define gmt_M_memcpy GMT_memcpy
-#define gmt_M_rgb_copy GMT_rgb_copy
-#define gmt_M_u255 GMT_u255
-#define gmt_M_err_fail GMT_err_fail
-#define gmt_M_free GMT_free
-#define gmt_M_is_fnan GMT_is_fnan
-#define gmt_M_memory GMT_memory
-#define gmt_get_cpt GMT_Get_CPT
-#define gmt_access GMT_access
-#define gmt_begin_module GMT_begin_module
-#define gmt_check_filearg GMT_check_filearg
-#define gmt_default_error GMT_default_error
-#define gmt_end_module GMT_end_module
-#define gmt_geo_to_xy GMT_geo_to_xy
-#define gmt_get_api_ptr GMT_get_API_ptr
-#define gmt_get_rgb_from_z GMT_get_rgb_from_z
-#define gmt_getrgb GMT_getrgb
-#define gmt_grd_project GMT_grd_project
-#define gmt_grd_setregion GMT_grd_setregion
-#define gmt_illuminate GMT_illuminate
-#define gmt_map_basemap GMT_map_basemap
-#define gmt_map_clip_off GMT_map_clip_off
-#define gmt_map_clip_on GMT_map_clip_on
-#define gmt_map_setup GMT_map_setup
-#define gmt_not_numeric GMT_not_numeric
-#define gmt_plane_perspective GMT_plane_perspective
-#define gmt_plotcanvas GMT_plotcanvas
-#define gmt_plotend GMT_plotend
-#define gmt_plotinit GMT_plotinit
-#define gmt_project_init GMT_project_init
-#define gmt_putrgb GMT_putrgb
-#define gmt_rgb_syntax GMT_rgb_syntax
-#define gmt_set_grddim GMT_set_grddim
-#define gmt_show_name_and_purpose GMT_show_name_and_purpose
-#endif
+
 
 EXTERN_MSC int GMT_mbgrdtiff(void *API, int mode, void *args);
 
@@ -765,7 +720,11 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 
 	/* Parse the command-line arguments */
 
+#if GMT_MAJOR_VERSION >= 6
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+#else
 	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+#endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = New_mbgrdtiff_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = GMT_mbgrdtiff_parse (GMT, Ctrl, options))) Return (error);
@@ -821,11 +780,7 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	
 	/* Determine if grid is to be projected */
 
-#if GMT_MINOR_VERSION > 2		/* We are at 5.3.X and above */
 	need_to_project = (gmt_M_is_nonlinear_graticule (GMT) || Ctrl->E.dpi > 0);
-#else
-	need_to_project = (GMT_IS_NONLINEAR_GRATICULE (GMT) || Ctrl->E.dpi > 0);
-#endif
 	if (need_to_project) GMT_Report (API, GMT_MSG_DEBUG, "Projected grid is non-orthogonal, nonlinear, or dpi was changed\n");
 	
 	/* Determine the wesn to be used to read the grid file; or bail if file is outside -R */
@@ -1025,11 +980,7 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 				if (P && gray_only)		/* Color table only has grays, pick r */
 					bitimage_8[byte++] = gmt_M_u255 (rgb[0]);
 				else if (Ctrl->M.active)	/* Convert rgb to gray using the GMT_YIQ transformation */
-#if GMT_MINOR_VERSION > 2		/* We are at 5.3.X and above */
 					bitimage_8[byte++] = gmt_M_u255 (gmt_M_yiq (rgb));
-#else
-					bitimage_8[byte++] = gmt_M_u255 (GMT_YIQ (rgb));
-#endif
 				else {
 					for (k = 0; k < 3; k++) bitimage_24[byte++] = i_rgb[k] = gmt_M_u255 (rgb[k]);
 					if (Ctrl->Q.active && index != GMT_NAN - 3) /* Keep track of all r/g/b combinations used except for NaN */

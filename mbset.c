@@ -36,6 +36,8 @@
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Set values in an mbprocess parameter file"
 #define THIS_MODULE_KEYS	""
+#define THIS_MODULE_NEEDS	""
+#define THIS_MODULE_OPTIONS "->V"
 
 /* GMT5 header file */
 #include "gmt_dev.h"
@@ -263,7 +265,11 @@ int GMT_mbset (void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
+#if GMT_MAJOR_VERSION >= 6
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+#else
 	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+#endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBSET_CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
