@@ -1496,13 +1496,11 @@ void mbcontour_setline(int linewidth)
         return;
 }
 /*--------------------------------------------------------------------------*/
-void mbcontour_newpen(int ipen)
-{
+void mbcontour_newpen(int ipen) {
 	double rgb[4];
 	rgb[3] = 0;		/* To not fall into the transparency case of pslib.c/psl_putcolor()  */
         
-	if (ipen > -1 && ipen < ncolor)
-		{
+	if (ipen > -1 && ipen < ncolor) {
 		rgb[0] = ((double)red[ipen]) / 255.0;
 		rgb[1] = ((double)green[ipen]) / 255.0;
 		rgb[2] = ((double)blue[ipen]) / 255.0;
@@ -1511,11 +1509,10 @@ void mbcontour_newpen(int ipen)
 	return;
 }
 /*--------------------------------------------------------------------------*/
-void mbcontour_justify_string(double height, char *string, double *s)
-{
+void mbcontour_justify_string(double height, char *string, double *s) {
 	int	len;
 
-	len = strlen(string);
+	len = (int)strlen(string);
 	s[0] = 0.0;
 	s[1] = 0.185*height*len;
 	s[2] = 0.37*len*height;
@@ -1524,12 +1521,11 @@ void mbcontour_justify_string(double height, char *string, double *s)
 	return;
 }
 /*--------------------------------------------------------------------------*/
-void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label)
-{
+void mbcontour_plot_string(double x, double y, double hgt, double angle, char *label) {
 	double	fontsize;
 	double	xx, yy;
-        int     justify = 5;
-        int     mode = 0;
+	int     justify = 5;
+	int     mode = 0;
 
 	fontsize = 72.0 * hgt / inchtolon;
 	gmt_geo_to_xy(GMT, x, y, &xx, &yy);

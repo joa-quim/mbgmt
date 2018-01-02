@@ -571,9 +571,9 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 					}
 					if (n_pings >= n_alloc) {
 						n_alloc = (int)(1.7 * n_alloc);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
-						api_alloc_datasegment(API, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
+						GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
+						GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
+						GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 					}
 					for (col = 0; col < n_beams; col++) {
 						D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
@@ -601,9 +601,9 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				else if (error > MB_ERROR_NO_ERROR)
 					done = true;
 			}
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
-			api_alloc_datasegment(API, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
+			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
+			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
+			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 			mb_close(verbose,&Ctrl->mbio_ptr,&error);
 			index[n_files] = n_pings;		/* Store the index at which a new file comes in contributing to out data */
 			n_files++;

@@ -618,7 +618,7 @@ void GMT_mbgrdtiff_set_proj_limits (struct GMT_CTRL *GMT, struct GMT_GRID_HEADER
 
 	if (gmt_M_is_geographic (GMT, GMT_IN)) {
 		all_lats = gmt_M_180_range (g->wesn[YHI], g->wesn[YLO]);
-		all_lons = gmt_M_grd_is_global (GMT, g);
+		all_lons = gmt_grd_is_global (GMT, g);
 		if (all_lons && all_lats) return;	/* Whole globe */
 	}
 	
@@ -904,7 +904,7 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	/* Get/calculate a color palette file */
 	if (!Ctrl->I.do_rgb) {
 		if (Ctrl->C.active) {		/* Read palette file */
-			if ((P = gmt_get_cpt (GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max)) == NULL) {
+			if ((P = gmt_get_cpt (GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0)) == NULL) {
 				Return (API->error);
 			}
 			gray_only = (P && P->is_gray);
