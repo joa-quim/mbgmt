@@ -346,11 +346,7 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION 
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-#if GMT_MAJOR_VERSION == 5 && GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
-				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
-#else
 				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
-#endif
 					Ctrl->I.inputfile = strdup (opt->arg);
 					n_files = 1;
 				}
@@ -665,7 +661,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 			zmin = mb_info.ss_min;		zmax = mb_info.ss_max;	strcat(file, "gray");					
 		}
 
-		if ((CPTcolor = gmt_get_cpt(GMT, "", GMT_CPT_OPTIONAL, zmin, zmax, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
+		if ((CPTcolor = gmt_get_cpt(GMT, "rainbow", GMT_CPT_OPTIONAL, zmin, zmax, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
 			Return (API->error);
 		gmt_scale_cpt (GMT, CPTcolor, -1);		/* Flip the color scale because Z is pos down (Blheak) */
 		CPTcolor->data->z_low = CPTcolor->range->z_low = zmin;

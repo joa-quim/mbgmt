@@ -30,7 +30,7 @@
 #define THIS_MODULE_NAME	"mbinfo"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Read a swath sonar data file and outputs some basic statistics."
-#define THIS_MODULE_KEYS	"<D{,>T},>DC" 
+#define THIS_MODULE_KEYS	"<D{,>D},>DC" 
 #define THIS_MODULE_NEEDS	""
 #define THIS_MODULE_OPTIONS "->RUV"
 
@@ -64,7 +64,7 @@ GMT_LOCAL struct ping {
 #define XML			2
 #define MAX_OUTPUT_FORMAT 2
 
-#define PR GMT_Put_Record(API, GMT_WRITE_TEXT, output); 
+#define PR GMT_Put_Record(API, GMT_WRITE_DATA, Out); 
 #define print sprintf
 
 /* Control structure for mbgetdata */
@@ -159,6 +159,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL;	/* General GMT interal parameters */
 	struct GMT_OPTION *options = NULL;
 	struct GMTAPI_CTRL *API = gmt_get_api_ptr (V_API);	/* Cast from void to GMTAPI_CTRL pointer */
+	struct GMT_RECORD *Out = NULL;
 	struct MBINFO_CTRL *Ctrl = NULL;
 	char program_name[] = "MBINFO";
 	char help_message[] =  "MBINFO reads a swath sonar data file and outputs\n"
@@ -380,11 +381,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
-#if GMT_MAJOR_VERSION >= 6
 	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
-#else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
-#endif
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBINFO_CTRL *)New_Ctrl(GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse(GMT, Ctrl, options))) Return (error);
@@ -400,6 +397,9 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	if (GMT_Begin_IO (API, GMT_IS_DATASET, GMT_OUT, GMT_HEADER_OFF) != GMT_NOERROR) {
 		Return (API->error);
 	}
+
+#define output outputf
+	Out = gmt_new_record(GMT, NULL, output);
 
 	/* get current default values */
 	status = mb_defaults(verbose,&format,&pings_get,&lonflip,bounds, btime_i,etime_i,&speedmin,&timegap);
@@ -476,8 +476,6 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	}
 	else
 		output_ = stream;
-
-#define output outputf
 
 	switch (output_format) {
 		case FREE_TEXT:
@@ -2331,6 +2329,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	/* close output file */
 	//if (output_usefile == MB_YES && output != NULL)
 		//fclose(output);
+	gmt_M_free (GMT, Out);
 
 	/* deallocate memory used for data arrays */
 	mb_freed(verbose,__FILE__,__LINE__,(void **)&bathmeantot,&error);

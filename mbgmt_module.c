@@ -49,7 +49,7 @@ struct Gmt_moduleinfo g_mbgmt_module[] = {
 	{"mbgrdtiff",   "mbgmt", "Create geotiff images", ""},
 	{"mbgrid_j",    "mbgmt", "grid bathymetry, amplitude, or sidescan data of a set of swath sonar data files", ""},
 	{"mbimport",    "mbgmt", "Get swath bathymetry, amplitude, or backscatter Image into Matlab", "<D{,CC(,MI}"},
-	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>T},>DC"},
+	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>D},>DC"},
 	{"mbset",       "mbgmt", "Set values in an mbprocess parameter file", ""},
 	{"mbswath",     "mbgmt", "Plot swath bathymetry, amplitude, or backscatter", ""},
 	{NULL, NULL, NULL} /* last element == NULL detects end of array */
