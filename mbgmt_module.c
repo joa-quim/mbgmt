@@ -52,6 +52,7 @@ struct Gmt_moduleinfo g_mbgmt_module[] = {
 	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>D},>DC"},
 	{"mbset",       "mbgmt", "Set values in an mbprocess parameter file", ""},
 	{"mbswath",     "mbgmt", "Plot swath bathymetry, amplitude, or backscatter", ""},
+	{"gmtmbgrid",   "mbgmt", "Grid table data using adjustable tension continuous curvature splines", "<D{,DD(,LG(,GG}"},
 	{NULL, NULL, NULL} /* last element == NULL detects end of array */
 };
 
@@ -69,6 +70,15 @@ void gmt_mbgmt_module_show_all (void *V_API) {
 		}
 		sprintf(message, "%-16s %s\n", g_mbgmt_module[module_id].name, g_mbgmt_module[module_id].purpose);
 		GMT_Message (V_API, GMT_TIME_NONE, message);
+		module_id++;
+	}
+}
+
+/* Produce single list on stdout of all MBGMT supplements module names for gmt --show-modules */
+void gmt_mbgmt_module_list_all (void *V_API) {
+	unsigned int module_id = 0;
+	while (g_mbgmt_module[module_id].name != NULL) {
+		printf ("%s\n", g_mbgmt_module[module_id].name);
 		module_id++;
 	}
 }

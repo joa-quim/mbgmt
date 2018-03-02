@@ -1,6 +1,6 @@
 /*
  * $Id $
- * Copyright (c) 2015 by P. Wessel
+ * Copyright (c) 2018 by J. Luis
  * See LICENSE.TXT file for copying and redistribution conditions.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -12,11 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
- * Contact info: http://www.soest.hawaii.edu/PT/GSFML
  */
 
-/* gsfml_module.h declares the prototypes for gsfml module functions
- * and the array that contains gsfml GMT module parameters such as name
+/* mbgmt_module.h declares the prototypes for mbgmt module functions
+ * and the array that contains MBGMT module parameters such as name
  * and purpose strings.
  */
 
@@ -42,9 +41,13 @@ EXTERN_MSC int GMT_mbimport  (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbinfo    (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbset     (void *API, int mode, void *args);
 EXTERN_MSC int GMT_mbswath   (void *API, int mode, void *args);
+EXTERN_MSC int GMT_gmtmbgrid (void *API, int mode, void *args);
 
-/* Pretty print all modules in the GMT core library and their purposes */
+/* Pretty print all modules in the MBGMT library and their purposes */
 EXTERN_MSC void gmt_mbgmt_module_show_all (void *API);
+
+/* List all modules in the MBGMT library to stdout */
+EXTERN_MSC void gmt_mbgmt_module_list_all (void *API);
 
 /* Undocumented API function for developers to get information about a module */
 EXTERN_MSC const char *gmt_mbgmt_module_info (void *API, char *candidate);
@@ -53,4 +56,4 @@ EXTERN_MSC const char *gmt_mbgmt_module_info (void *API, char *candidate);
 }
 #endif
 
-#endif /* !_GMT_GSFML_MODULE_H */
+#endif
