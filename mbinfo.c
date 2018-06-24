@@ -30,7 +30,7 @@
 #define THIS_MODULE_NAME	"mbinfo"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Read a swath sonar data file and outputs some basic statistics."
-#define THIS_MODULE_KEYS	"<D{,>D},>DC" 
+#define THIS_MODULE_KEYS	"<D{,>D},>DC,>DO" 
 #define THIS_MODULE_NEEDS	""
 #define THIS_MODULE_OPTIONS "->RUV"
 
@@ -77,7 +77,6 @@ GMT_LOCAL struct MBINFO_CTRL {
 
 GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBINFO_CTRL *Ctrl;
-	int     verbose = 0;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBINFO_CTRL);
 
@@ -174,7 +173,6 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	extern char *optarg;
 	int	errflg = 0;
 	int	help = 0;
-	int	flag = 0;
 
 	/* MBIO status variables */
 	int	status = MB_SUCCESS;

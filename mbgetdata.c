@@ -35,6 +35,7 @@ EXTERN_MSC int GMT_mbgetdata(void *API, int mode, void *args);
 #include "mb_define.h"
 #include "mb_info.h"
 #include "mb_io.h"
+#include "mb_process.h"
 
 /* global structure definitions */
 GMT_LOCAL struct ping_local {
@@ -70,6 +71,7 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 
 	struct mbgetdata_A {	/* -A apply flags */
 		bool active;
+		bool no_flags;
 		double value;
 	} A;
 	struct mbgetdata_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
@@ -173,7 +175,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/
 GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> %s [-A[value]] [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-b<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-C<cptfile>] [-D<mode>/<ampscale>/<ampmin>/<ampmax>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-e<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
@@ -181,14 +183,16 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<index_file>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s]\n", GMT_Rgeo_OPT, GMT_V_OPT);
-	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
-									 GMT_X_OPT, GMT_Y_OPT, GMT_c_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
+									 GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
 	GMT_Message (API, GMT_TIME_NONE, "\t<inputfile> is an MB-System datalist referencing the swath data to be plotted.\n");
 	GMT_Option (API, "J-");
 	GMT_Message (API, GMT_TIME_NONE, "\n\tOPTIONS:\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-A Replace flagged beans with NaN. Use -A<val> to assign a constant value to the\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   flagged beans. Use negative <val> to also search for flagged beans in .esf files.\n");
 	GMT_Option (API, "B-");
 	GMT_Message (API, GMT_TIME_NONE, "\t-C Color palette file to convert z to rgb.  Optionally, instead give name of a master cpt\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   to automatically assign 16 continuous colors over the data range [rainbow].\n");
@@ -246,9 +250,13 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 					n_errors++;
 				}
 				break;
-			case 'A':	/* Apply flags (make z nan) */
+			case 'A':	/* Apply flags, Make z nan or add a flag value */
 				Ctrl->A.active = true;
 				if (opt->arg) Ctrl->A.value = atof(opt->arg);
+				if (Ctrl->A.value < 0) {
+					Ctrl->A.no_flags = true;
+					Ctrl->A.value *= -1;
+				}
 				break;
 			case 'D':	/* amplitude scaling */
 				n = sscanf(opt->arg, "%d/%lf/%lf/%lf", &(Ctrl->D.mode), &(Ctrl->D.ampscale),
@@ -364,7 +372,7 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 int GMT_mbgetdata (void *V_API, int mode, void *args) {
 
 	uint64_t  dim[4];
-	int    n_alloc = 200;
+	int    k, k_last_ping, n_alloc = 200;
 	char   program_name[] = "mbgetdata";
 	double NaN;
 	struct GMT_CTRL *GMT = NULL, *GMT_cpy = NULL;	/* General GMT interal parameters */
@@ -373,19 +381,19 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	struct MBGETDATA_CTRL *Ctrl = NULL;
 	struct GMT_DATASET *D = NULL;
 	struct GMT_DATASET *D2 = NULL;
-	struct GMT_MATRIX *M = NULL;
 
 	/* MBIO status variables */
-	bool   done = false, read_data = false;
+	bool   done = false, read_data = false, found;
 	int    status = MB_SUCCESS;
 	int    verbose = 0, n_files = 0;
 	int    error = MB_ERROR_NO_ERROR;
 	char  *message = NULL;
 
-	char   file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""};
+	char   file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""}, esffile[MB_PATH_MAXLINE] = {""};
 	int    format, file_in_bounds, pings, n_pings, n_beams, n_beams_max, col;
 	int   *index;
 	struct mb_info_struct mb_info;
+	struct mb_esf_struct esf;
 	gmt_M_make_dnan(NaN);
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
@@ -531,6 +539,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), &(Ctrl->data.sslon), &error);
 			if (error == MB_ERROR_NO_ERROR)
 				mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_SIDESCAN, sizeof(double), &(Ctrl->data.sslat), &error);
+			//if (error == MB_ERROR_NO_ERROR && Ctrl->A.active)
+				//mb_register_array(verbose, Ctrl->mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(double), &(Ctrl->data.time_d), &error);
 
 			/* if error initializing memory then quit */
 			if (error != MB_ERROR_NO_ERROR) {
@@ -543,7 +553,12 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 			/* print message */
 			if (verbose) GMT_Report(API, GMT_MSG_NORMAL,"processing data in %s...\n",file);
 
+			if (Ctrl->A.active) {
+				status = mb_esf_load(verbose, program_name, file, MB_YES, MB_NO, esffile, &esf, &error);
+			}
+
 			/* loop over reading */
+			k_last_ping = 0;
 			done = false;
 			while (!done) {
 				mb_read(verbose,Ctrl->mbio_ptr,&(Ctrl->data.kind), &(Ctrl->data.pings),Ctrl->data.time_i,
@@ -586,6 +601,21 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 						D->table[0]->segment[2]->data[col][n_pings] = NaN;
 					}
 					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN or add a cte value */
+						if (Ctrl->A.no_flags && esf.nedit > 0) {
+							found = false;
+							while (k_last_ping <= esf.nedit && esf.edit[k_last_ping].time_d < Ctrl->data.time_d) {
+								found = true;
+								k_last_ping++;
+							}
+							if (found) {
+								k = k_last_ping;
+								while (esf.edit[k].time_d == esf.edit[k+1].time_d && k < esf.nedit) {
+									if (esf.edit[k].action != MBP_EDIT_UNFLAG)
+										Ctrl->data.beamflag[esf.edit[k].beam] = 1;
+									k++;
+								}
+							}
+						}
 						if (Ctrl->A.value) {
 							for (col = 0; col < n_beams; col++)
 								if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] += Ctrl->A.value;
@@ -606,6 +636,9 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 			mb_close(verbose,&Ctrl->mbio_ptr,&error);
 			index[n_files] = n_pings;		/* Store the index at which a new file comes in contributing to out data */
+			if (Ctrl->A.active && esf.nedit > 0 || esf.esffp != NULL) {
+				status = mb_esf_close(verbose, &esf, &error);
+			}
 			n_files++;
 		} /* end if file in bounds */
 

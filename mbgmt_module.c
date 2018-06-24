@@ -49,15 +49,16 @@ struct Gmt_moduleinfo g_mbgmt_module[] = {
 	{"mbgrdtiff",   "mbgmt", "Create geotiff images", ""},
 	{"mbgrid_j",    "mbgmt", "grid bathymetry, amplitude, or sidescan data of a set of swath sonar data files", ""},
 	{"mbimport",    "mbgmt", "Get swath bathymetry, amplitude, or backscatter Image into Matlab", "<D{,CC(,MI}"},
-	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>D},>DC"},
+	{"mbinfo",      "mbgmt", "Read a swath sonar data file and outputs some basic statistics.", "<D{,>D},>DC,>DO"},
 	{"mbset",       "mbgmt", "Set values in an mbprocess parameter file", ""},
+	{"mbprocess",   "mbgmt", "Tool for processing swath sonar bathymetry data", "ID{,OD("},
 	{"mbswath",     "mbgmt", "Plot swath bathymetry, amplitude, or backscatter", ""},
 	{"gmtmbgrid",   "mbgmt", "Grid table data using adjustable tension continuous curvature splines", "<D{,DD(,LG(,GG}"},
 	{NULL, NULL, NULL} /* last element == NULL detects end of array */
 };
 
 /* Pretty print all GMT mbgmt module names and their purposes */
-void gmt_mbgmt_module_show_all (void *V_API) {
+void gmt_mbgmt_module_show_all(void *V_API) {
 	unsigned int module_id = 0;
 	char message[256];
 	GMT_Message (V_API, GMT_TIME_NONE, "\n=== " "GMT mbgmt : Tools for the MBGMT project" " ===\n");
@@ -75,22 +76,49 @@ void gmt_mbgmt_module_show_all (void *V_API) {
 }
 
 /* Produce single list on stdout of all MBGMT supplements module names for gmt --show-modules */
-void gmt_mbgmt_module_list_all (void *V_API) {
+void gmt_mbgmt_module_list_all(void *V_API) {
 	unsigned int module_id = 0;
 	while (g_mbgmt_module[module_id].name != NULL) {
-		printf ("%s\n", g_mbgmt_module[module_id].name);
+		printf("%s\n", g_mbgmt_module[module_id].name);
 		module_id++;
 	}
 }
 
 /* Lookup module id by name, return option keys pointer (for external API developers) */
-const char *gmt_mbgmt_module_info (void *API, char *candidate) {
+const char *gmt_mbgmt_module_info(void *API, char *candidate) {
 	int module_id = 0;
 
 	/* Match actual_name against g_module[module_id].name */
-	while (g_mbgmt_module[module_id].name != NULL && strcmp (candidate, g_mbgmt_module[module_id].name))
+	while (g_mbgmt_module[module_id].name != NULL && strcmp(candidate, g_mbgmt_module[module_id].name))
 		module_id++;
 
 	/* Return Module keys or NULL */
 	return (g_mbgmt_module[module_id].keys);
+}
+
+
+/* Lookup module id by name, return option keys pointer (for external API developers) */
+const char *gmt_mbgmt_module_keys(void *API, char *candidate) {
+	int module_id = 0;
+	//gmt_M_unused(API);
+
+	/* Match actual_name against g_module[module_id].name */
+	while (g_mbgmt_module[module_id].name != NULL && strcmp(candidate, g_mbgmt_module[module_id].name))
+		module_id++;
+
+	/* Return Module keys or NULL */
+	return (g_mbgmt_module[module_id].keys);
+}
+
+/* Lookup module id by name, return group char name (for external API developers) */
+const char *gmt_mbgmt_module_group (void *API, char *candidate) {
+	int module_id = 0;
+	//gmt_M_unused(API);
+
+	/* Match actual_name against g_module[module_id].name */
+	while (g_mbgmt_module[module_id].name != NULL && strcmp(candidate, g_mbgmt_module[module_id].name))
+		module_id++;
+
+	/* Return Module keys or NULL */
+	return (g_mbgmt_module[module_id].component);
 }

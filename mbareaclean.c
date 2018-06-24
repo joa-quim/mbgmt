@@ -351,7 +351,7 @@ int GMT_mbareaclean (void *V_API, int mode, void *args) {
 	char help_message[] =  "MBAREACLEAN identifies and flags artifacts in swath bathymetry data";
 	char usage_message[] = "mbareaclean [-Fformat -Iinfile -Rwest/east/south/north -B -G -Sbinsize	\n\t -Mthreshold/nmin -Dthreshold[/nmin[/nmax]] -Ttype -N[-]minbeam/maxbeam]";
 	extern char *optarg;
-	int	errflg = 0, help = 0, flag = 0;
+	int	errflg = 0, help = 0;
 
 	/* sounding storage values and arrays (they used to be globals) */
 	int	nfile = 0, nfile_alloc = 0, nsndg = 0;
