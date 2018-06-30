@@ -73,15 +73,16 @@ GMT_LOCAL struct MBINFO_CTRL {
 		bool active;
 		char *inputfile;
 	} I;
+	struct mbinfo_G {	/* Good nav only */
+		bool active;
+	} G;
 };
 
 GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBINFO_CTRL *Ctrl;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBINFO_CTRL);
-
 	Ctrl->I.inputfile = NULL;
-	
 	return (Ctrl);
 }
 
@@ -127,6 +128,11 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl, struct GMT_
 				break;
 
 			/* Processes program-specific parameters */
+
+			case 'G':	/*  Good nav only */
+				Ctrl->G.active = true;
+				break;
+
 			case 'I':	/* -I<inputfile> */
 				Ctrl->I.active = true;
 				if (!gmt_access (GMT, opt->arg, R_OK)) {	/* Got a file */
@@ -208,7 +214,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	void	*mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr;
 	int	kind;
-	struct ping *data[MBINFO_MAXPINGS];
+	struct ping data[MBINFO_MAXPINGS];
 	struct ping *datacur;
 	int	time_i[7];
 	double	time_d, navlon, navlat, speed, heading, distance, altitude, sonardepth;
@@ -352,7 +358,6 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 
 	/* output stream for basic stuff (stdout if verbose <= 1, output if verbose > 1) */
 	FILE	*stream = NULL;
-	//FILE	*output = NULL;
 	FILE	*output_ = NULL;
 	int		output_usefile = MB_NO;
 	char	output_file[MB_PATH_MAXLINE];
@@ -396,6 +401,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 		Return (API->error);
 	}
 
+	good_nav_only = Ctrl->G.active ? MB_YES : MB_NO;
+
 #define output outputf
 	Out = gmt_new_record(GMT, NULL, output);
 
@@ -417,7 +424,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 		fprintf(stream,"usage: %s\n", usage_message);
 		fprintf(stream,"\nProgram <%s> Terminated\n", program_name);
 		error = MB_ERROR_BAD_USAGE;
-		return(error);
+		return error;
 	}
 
 	/* print starting message */
@@ -431,7 +438,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	if (help) {
 		fprintf(stream,"\n%s\n",help_message);
 		fprintf(stream,"\nusage: %s\n", usage_message);
-		return(error);
+		return error;
 	}
 
 	/* get format if required */
@@ -527,20 +534,9 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	}
 
 	/* allocate memory for data arrays */
-	for (i=0;i<pings_read;i++) {
-		data[i] = NULL;
-		status = mb_mallocd(verbose,__FILE__,__LINE__,pings_read*sizeof(struct ping), (void **)&data[i],&error);
-		if (error == MB_ERROR_NO_ERROR) {
-			datacur = data[i];
-			datacur->beamflag = NULL;
-			datacur->bath = NULL;
-			datacur->amp = NULL;
-			datacur->bathlon = NULL;
-			datacur->bathlat = NULL;
-			datacur->ss = NULL;
-			datacur->sslon = NULL;
-			datacur->sslat = NULL;
-		}
+	memset(data, 0, MBINFO_MAXPINGS * sizeof(struct ping));
+	for (i = 0; i < pings_read; i++) {
+		datacur = &data[i];
 		if (error == MB_ERROR_NO_ERROR)
 			status = mb_register_array(verbose, mbio_ptr, MB_MEM_TYPE_BATHYMETRY, sizeof(char), (void **)&datacur->beamflag, &error);
 		if (error == MB_ERROR_NO_ERROR)
@@ -671,12 +667,13 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				print(output,"%s",format_description);PR
 				break;
 			case JSON:
-				print(output,"\"file_info\":{\n");PR
-				print(output,"\"swath_data_file\":\"%s\",\n",fileprint);PR
-				print(output,"\"mbio_data_format_id\":\"%d\",\n",format);PR
+				print(output,"\"file_info\": {\n");PR
+				print(output,"\"swath_data_file\": \"%s\",\n",fileprint);PR
+				print(output,"\"mbio_data_format_id\": \"%d\",\n",format);PR
 				len1=(int)strspn(format_description,"Formatname: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
+				string[len2] = '\0'
 				print(output,"\"format_name\": \"%s\",\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"InformalDescription: ");
@@ -700,11 +697,13 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				len1=(int)strspn(format_description,"Formatname: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
+				string[len2] = '\0'
 				print(output,"\t\t<format_name>%s</format_name>\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"InformalDescription: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
+				string[len2] = '\0'
 				print(output,"\t\t<informal_description>%s</informal_description>\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"Attributes: ");
@@ -727,7 +726,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 		while (nread < pings_read && error == MB_ERROR_NO_ERROR) {
 
 			/* read a ping of data */
-			datacur = data[nread];
+			datacur = &data[nread];
 			status = mb_read(verbose,mbio_ptr,&kind,&pings, time_i,&time_d, &navlon,&navlat, &speed,&heading,
 			                 &distance,&altitude,&sonardepth, &beams_bath,&beams_amp,&pixels_ss,
 			                 datacur->beamflag,datacur->bath,datacur->amp, datacur->bathlon,
@@ -1158,11 +1157,14 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 					}
 
 			/* output error messages */
+#if 0
 			if (pass != 0 || error == MB_ERROR_COMMENT) { /* do nothing */
 			}
 			else if (error == MB_ERROR_SUBBOTTOM) { /* do nothing */
 			}
-			else if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
+			else 
+#endif
+			if (verbose >= 1 && error < MB_ERROR_NO_ERROR && error >= MB_ERROR_OTHER) {
 				mb_error(verbose,error,&message);
 				fprintf(stream,"\nNonfatal MBIO Error:\n%s", message);
 				fprintf(stream,"Time: %d %d %d %d %d %d %d", time_i[0],time_i[1],time_i[2],
@@ -1306,10 +1308,10 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 					timend_i[i] = time_i[i];
 
 				/* check for good nav */
-				speed_apparent = 3600.0*distance
-					/(time_d - time_d_last);
+				speed_apparent = 3600.0*distance / (time_d - time_d_last);
 				if (good_nav_only == MB_YES) {
-					if (navlon == 0.0 || navlat == 0.0) {
+					//if (navlon == 0.0 || navlat == 0.0) {		// This still misses lots of trash JL
+					if ((navlon > -0.005 && navlon < 0.005) && (navlat > -0.005 && navlat < 0.005)) {
 						good_nav = MB_NO;
 					}
 					else if (beginnav == MB_YES && speed_apparent >= speed_threshold) {
@@ -1477,7 +1479,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 		if (pass == 0 && pings_read > 2 && nread == pings_read && (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP)) {
 
 			/* do the bathymetry */
-			for (i=0;i<beams_bath;i++) {
+			for (i = 0; i < beams_bath; i++) {
 
 				/* fit line to depths */
 				nbath  = 0;
@@ -1486,8 +1488,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				sumy  = 0.0;
 				sumxy = 0.0;
 				variance = 0.0;
-				for (j=0;j<nread;j++) {
-					datacur = data[j];
+				for (j = 0; j < nread; j++) {
+					datacur = &data[j];
 					bath = datacur->bath;
 					beamflag = datacur->beamflag;
 					if (mb_beam_ok(beamflag[i])) {
@@ -1502,8 +1504,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 					delta = nbath*sumxx - sumx*sumx;
 					a = (sumxx*sumy - sumx*sumxy)/delta;
 					b = (nbath*sumxy - sumx*sumy)/delta;
-					for (j=0;j<nread;j++) {
-						datacur = data[j];
+					for (j = 0; j < nread; j++) {
+						datacur = &data[j];
 						bath = datacur->bath;
 						beamflag = datacur->beamflag;
 						if (mb_beam_ok(beamflag[i])) {
@@ -1518,12 +1520,12 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 			}
 
 			/* do the amplitude */
-			for (i=0;i<beams_amp;i++) {		/* get mean amplitude */
+			for (i = 0; i < beams_amp; i++) {		/* get mean amplitude */
 				namp  = 0;
 				mean  = 0.0;
 				variance = 0.0;
-				for (j=0;j<nread;j++) {
-					datacur = data[j];
+				for (j = 0; j < nread; j++) {
+					datacur = &data[j];
 					amp = datacur->amp;
 					beamflag = datacur->beamflag;
 					if (mb_beam_ok(beamflag[i])) {
@@ -1533,8 +1535,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				}
 				if (namp == pings_read) {
 					mean = mean/namp;
-					for (j=0;j<nread;j++) {
-						datacur = data[j];
+					for (j = 0; j < nread; j++) {
+						datacur = &data[j];
 						amp = datacur->amp;
 						if (mb_beam_ok(beamflag[i])) {
 							dev = amp[i] - mean;
@@ -1548,12 +1550,12 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 			}
 
 			/* do the sidescan */
-			for (i=0;i<pixels_ss;i++) {		/* get mean sidescan */
+			for (i = 0; i < pixels_ss; i++) {		/* get mean sidescan */
 				nss  = 0;
 				mean  = 0.0;
 				variance = 0.0;
-				for (j=0;j<nread;j++) {
-					datacur = data[j];
+				for (j = 0; j < nread; j++) {
+					datacur = &data[j];
 					ss = datacur->ss;
 					if (ss[i] > MB_SIDESCAN_NULL) {
 						nss++;
@@ -1562,8 +1564,8 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				}
 				if (nss == pings_read) {
 					mean = mean/nss;
-					for (j=0;j<nread;j++) {
-						datacur = data[j];
+					for (j = 0; j < nread; j++) {
+						datacur = &data[j];
 						ss = datacur->ss;
 						if (ss[i] > MB_SIDESCAN_NULL) {
 							dev = ss[i] - mean;
@@ -1826,7 +1828,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 			break;
 		case JSON:
 			print(output,"\"data_totals\": {");PR
-			print(output,"\"number_of_records\":\"%d\"",irec);PR
+			print(output,"\"number_of_records\": \"%d\"",irec);PR
 			isbtmrec = notice_list_tot[MB_DATA_SUBBOTTOM_MCS] + notice_list_tot[MB_DATA_SUBBOTTOM_CNTRBEAM] +
 			           notice_list_tot[MB_DATA_SUBBOTTOM_SUBBOTTOM];
 			if (isbtmrec > 0)
@@ -2210,7 +2212,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 					if (notice_list_tot[i] > 0) {
 						mb_notice_message(verbose, i, &notice_msg);
 						if (notice_total>0) {print(output,",");PR}
-						print(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}}",
+						print(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
 						              notice_list_tot[i], notice_msg);PR
 						notice_total++;
 					}
@@ -2223,7 +2225,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 					if (notice_list_tot[i] > 0) {
 						mb_notice_message(verbose, i, &notice_msg);
 						if (notice_total>0) {print(output,",");PR}
-						print(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\":\"%s\"\n}}",
+						print(output, "{\"notice\": {\n\"notice_number\": \"%d\",\n\"notice_message\": \"%s\"\n}}",
 						              notice_list_tot[i], notice_msg);PR
 						notice_total++;
 					}
