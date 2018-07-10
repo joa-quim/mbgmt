@@ -643,7 +643,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file */
 	if (Ctrl->C.active) {
-		if ((CPTcolor = gmt_get_cpt(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0)) == NULL)
+		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL)
 			Return (API->error);
 		if (CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
 			Ctrl->image_type = MBSWATH_IMAGE_8;
@@ -652,16 +652,18 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 		char   file[8] = {""};	/* If used as is, it will mean 'rainbow' to gmt_get_cpt() -- NOT USED!!!! -- */
 		double zmin, zmax;
 		if (Ctrl->Z.mode <= MBSWATH_BATH_AMP) {		/* Cases 1, 2 and 3. They plot the bathymetry. */
-			zmin = mb_info.depth_min;		zmax = mb_info.depth_max;
+			zmin = mb_info.depth_min;	zmax = mb_info.depth_max;	strcat(file, "rainbow");
 		}
 		else if (Ctrl->Z.mode == MBSWATH_AMP) { 	/* Case 4 */
-			zmin = mb_info.amp_min;		zmax = mb_info.amp_max;	strcat(file, "gray");		
+			zmin = mb_info.amp_min;		zmax = mb_info.amp_max;		strcat(file, "gray");
+			Ctrl->image_type = MBSWATH_IMAGE_8;
 		}
 		else {		/* Case 5 (MBSWATH_SS) */
-			zmin = mb_info.ss_min;		zmax = mb_info.ss_max;	strcat(file, "gray");					
+			zmin = mb_info.ss_min;		zmax = mb_info.ss_max;		strcat(file, "gray");
+			Ctrl->image_type = MBSWATH_IMAGE_8;
 		}
 
-		if ((CPTcolor = gmt_get_cpt(GMT, "rainbow", GMT_CPT_OPTIONAL, zmin, zmax, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
+		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
 			Return (API->error);
 		gmt_scale_cpt (GMT, CPTcolor, -1);		/* Flip the color scale because Z is pos down (Blheak) */
 		CPTcolor->data->z_low = CPTcolor->range->z_low = zmin;
@@ -673,7 +675,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file for amplitude shading if requested */
 	if (Ctrl->N.active) {
-		if ((CPTshade = gmt_get_cpt (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0)) == NULL)
+		if ((CPTshade = gmt_get_palette (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0, 0, 0)) == NULL)
 			Return (API->error);
 	}
 
