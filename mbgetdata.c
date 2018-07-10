@@ -69,15 +69,27 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 	void   *mbio_ptr;
 	struct  ping_local data;
 
+	struct mbgetdata_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
+		bool active;
+		int time_i[7];
+	} b;
+	struct mbgetdata_e {	/* -e<year>/<month>/<day>/<hour>/<minute>/<second> */
+		bool active;
+		int time_i[7];
+	} e;
+	struct mswath_p {		/* -p<pings> */
+		bool active;
+		int pings;
+	} p;
 	struct mbgetdata_A {	/* -A apply flags */
 		bool active;
 		bool no_flags;
 		double value;
 	} A;
-	struct mbgetdata_b {	/* -b<year>/<month>/<day>/<hour>/<minute>/<second> */
+	struct mbgetdata_C {	/* -C */
 		bool active;
-		int time_i[7];
-	} b;
+		int type;		/* 0 -> SS; 1 -> Amp */
+	} C;
 	struct mbgetdata_D {	/* -D<mode>/<ampscale>/<ampmin>/<ampmax> */
 		bool active;
 		unsigned int mode;
@@ -85,18 +97,10 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 		double ampmin;
 		double ampmax;
 	} D;
-	struct mbgetdata_e {	/* -e<year>/<month>/<day>/<hour>/<minute>/<second> */
-		bool active;
-		int time_i[7];
-	} e;
 	struct mbgetdata_F {	/* -F<format> */
 		bool active;
 		int format;
 	} F;
-	struct mbgetdata_M {	/* -M<out_fname> */
-		bool active;
-		char *file;
-	} M;
 	struct mbgetdata_I {	/* -I<inputfile> */
 		bool active;
 		char *file;
@@ -105,14 +109,14 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 		bool active;
 		int lonflip;
 	} L;
+	struct mbgetdata_M {	/* -M<out_fname> */
+		bool active;
+		char *file;
+	} M;
 	struct mbgetdata_N {	/* -N<index_file> */
 		bool active;
 		char *file;
 	} N;
-	struct mswath_p {		/* -p<pings> */
-		bool active;
-		int pings;
-	} p;
 	struct mbgetdata_R {	/* fake -R */
 		bool active;
 	} Rfake;
@@ -177,8 +181,8 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> %s [-A[value]] [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-b<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t[-C<cptfile>] [-D<mode>/<ampscale>/<ampmin>/<ampmax>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-e<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-C[a]] [-D<mode>/<ampscale>/<ampmin>/<ampmax>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-F<format>] [-G<magnitude>/<azimuth | median>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<index_file>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
@@ -194,10 +198,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t-A Replace flagged beans with NaN. Use -A<val> to assign a constant value to the\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   flagged beans. Use negative <val> to also search for flagged beans in .esf files.\n");
 	GMT_Option (API, "B-");
-	GMT_Message (API, GMT_TIME_NONE, "\t-C Color palette file to convert z to rgb.  Optionally, instead give name of a master cpt\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t   to automatically assign 16 continuous colors over the data range [rainbow].\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t   if -Jx or -Jm is not selected.\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t   Give i to do the interpolation in PostScript at device resolution.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-C Output SideScan, or amplitude if -Ca, instead of bathymetry. This case ignores -A\n");
 	gmt_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
 	GMT_Option (API, "K");
 	GMT_Option (API, "O,P");
@@ -250,24 +251,6 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 					n_errors++;
 				}
 				break;
-			case 'A':	/* Apply flags, Make z nan or add a flag value */
-				Ctrl->A.active = true;
-				if (opt->arg) Ctrl->A.value = atof(opt->arg);
-				if (Ctrl->A.value < 0) {
-					Ctrl->A.no_flags = true;
-					Ctrl->A.value *= -1;
-				}
-				break;
-			case 'D':	/* amplitude scaling */
-				n = sscanf(opt->arg, "%d/%lf/%lf/%lf", &(Ctrl->D.mode), &(Ctrl->D.ampscale),
-				           &(Ctrl->D.ampmin), &(Ctrl->D.ampmax));
-				if (n > 0)
-					Ctrl->D.active = true;
-				else {
-					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
-					n_errors++;
-				}
-				break;
 			case 'e':	/* etime_i */
 				n = sscanf(opt->arg, "%d/%d/%d/%d/%d/%d",
 						   &(Ctrl->e.time_i[0]), &(Ctrl->e.time_i[1]), &(Ctrl->e.time_i[2]),
@@ -277,6 +260,37 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 					Ctrl->e.active = true;
 				else {
 					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -e option: \n");
+					n_errors++;
+				}
+				break;
+			case 'p':	/* Sets the ping averaging */
+				Ctrl->p.active = true;
+				Ctrl->p.pings = atoi(opt->arg);
+				if (Ctrl->p.pings < 0) {
+					GMT_Report (API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
+					Ctrl->p.pings = 1;
+				}
+				break;
+
+			case 'A':	/* Apply flags, Make z nan or add a flag value */
+				Ctrl->A.active = true;
+				if (opt->arg) Ctrl->A.value = atof(opt->arg);
+				if (Ctrl->A.value < 0) {
+					Ctrl->A.no_flags = true;
+					Ctrl->A.value *= -1;
+				}
+				break;
+			case 'C':	/* SideScan or Amplitude */
+				Ctrl->C.active = true;
+				if (opt->arg && opt->arg[0] == 'a') Ctrl->C.type = 1;
+				break;
+			case 'D':	/* amplitude scaling */
+				n = sscanf(opt->arg, "%d/%lf/%lf/%lf", &(Ctrl->D.mode), &(Ctrl->D.ampscale),
+				           &(Ctrl->D.ampmin), &(Ctrl->D.ampmax));
+				if (n > 0)
+					Ctrl->D.active = true;
+				else {
+					GMT_Report (API, GMT_MSG_NORMAL, "Syntax error -D option: \n");
 					n_errors++;
 				}
 				break;
@@ -312,17 +326,9 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 			case 'M':	/* -M fake option */
 				Ctrl->M.file = strdup(opt->arg);
 				break;
-			case 'N':	/* -M fake option */
+			case 'N':	/* -N<index_file> */
 				Ctrl->N.active = true;
 				Ctrl->N.file = strdup(opt->arg);
-				break;
-			case 'p':	/* Sets the ping averaging */
-				Ctrl->p.active = true;
-				Ctrl->p.pings = atoi(opt->arg);
-				if (Ctrl->p.pings < 0) {
-					GMT_Report (API, GMT_MSG_NORMAL, "Error -p option: Don't invent, number of pings must be >= 0\n");
-					Ctrl->p.pings = 1;
-				}
 				break;
 			case 'S':	/* -S<speed> */
 				n = sscanf(opt->arg, "%lf", &(Ctrl->S.speed));
@@ -347,6 +353,8 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct G
 				break;
 		}
 	}
+
+	if (Ctrl->C.active) Ctrl->A.active = false;		/* To play safe */
 
 	if (!GMT->common.R.active[RSET]) {	/* When no Region specified, set a fake one here */
 		gmt_parse_common_options (GMT, "R", 'R', "0/1/0/1");
@@ -390,7 +398,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	char  *message = NULL;
 
 	char   file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""}, esffile[MB_PATH_MAXLINE] = {""};
-	int    format, file_in_bounds, pings, n_pings, n_beams, n_beams_max, col;
+	int    format, file_in_bounds, pings, n_pings, n_beams, n_beams_max = 0, col;
 	int   *index;
 	struct mb_info_struct mb_info;
 	struct mb_esf_struct esf;
@@ -417,7 +425,9 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
 
 	/*---------------------------- This is the mbgetdata main code ----------------------------*/
-	
+
+	memset(&esf, 0, sizeof(struct mb_esf_struct));
+
 	pings = Ctrl->p.pings;		/* If pings were set by user, prefer it */
 
 	/* set verbosity */
@@ -507,8 +517,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 
 		/* read if data may be in bounds */
 		if (file_in_bounds == MB_YES) {
-			/* check for "fast bathymetry" or "fbt" file */
-			mb_get_fbt(verbose, file, &format, &error);
+			if (!Ctrl->C.active)		/* check for "fast bathymetry" or "fbt" file */
+				mb_get_fbt(verbose, file, &format, &error);
 
 			if ((status = mb_read_init(verbose, file, format, pings, Ctrl->L.lonflip, Ctrl->bounds, Ctrl->b.time_i,
 									   Ctrl->e.time_i, Ctrl->S.speed, Ctrl->T.timegap, &Ctrl->mbio_ptr, &Ctrl->btime_d,
@@ -520,7 +530,12 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				GMT_Report(API, GMT_MSG_NORMAL,"\nProgram <%s> Terminated\n", program_name);
 				Return(error);
 			}
-			n_beams_max = Ctrl->beams_bath_max;
+#if 0
+			if (Ctrl->C.active && Ctrl->C.type == 0)	/* SideScan */
+				n_beams_max = Ctrl->pixels_ss_max;
+			else
+				n_beams_max = Ctrl->beams_bath_max;
+#endif
 
 			/* allocate memory for data arrays */
 			if (error == MB_ERROR_NO_ERROR)
@@ -553,9 +568,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 			/* print message */
 			if (verbose) GMT_Report(API, GMT_MSG_NORMAL,"processing data in %s...\n",file);
 
-			if (Ctrl->A.active) {
+			if (Ctrl->A.active)
 				status = mb_esf_load(verbose, program_name, file, MB_YES, MB_NO, esffile, &esf, &error);
-			}
 
 			/* loop over reading */
 			k_last_ping = 0;
@@ -574,7 +588,18 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				/* update bookkeeping */
 				if (error == MB_ERROR_NO_ERROR || error == MB_ERROR_TIME_GAP) {		/* ignore time gaps */
 					error = MB_ERROR_NO_ERROR;
-					n_beams = Ctrl->data.beams_bath;
+					if (n_beams_max == 0) {
+						if (Ctrl->C.active) {
+							if (Ctrl->C.type == 0)
+								n_beams = Ctrl->data.pixels_ss;
+							else
+								n_beams = Ctrl->data.beams_amp;
+							if (n_beams == 0) continue;
+						}
+						else
+							n_beams = Ctrl->data.beams_bath;
+					}
+
 					n_beams_max = MAX(n_beams_max, n_beams);
 					if (n_pings == 0) {
 						dim[0] = 1;		dim[1] = 3;		dim[2] = n_alloc;		dim[3] = n_beams_max;
@@ -590,40 +615,59 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 						GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
 						GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_alloc, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
 					}
-					for (col = 0; col < n_beams; col++) {
-						D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
-						D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
-						D->table[0]->segment[2]->data[col][n_pings] = -Ctrl->data.bath[col];
-					}
-					for (col = n_beams; col < n_beams_max; col++) {		/* NaNify the remaining beams of this ping */
-						D->table[0]->segment[0]->data[col][n_pings] = NaN;
-						D->table[0]->segment[1]->data[col][n_pings] = NaN;
-						D->table[0]->segment[2]->data[col][n_pings] = NaN;
-					}
-					if (Ctrl->A.active) {		/* Convert all flagged beams to NaN or add a cte value */
-						if (Ctrl->A.no_flags && esf.nedit > 0) {
-							found = false;
-							while (k_last_ping <= esf.nedit && esf.edit[k_last_ping].time_d < Ctrl->data.time_d) {
-								found = true;
-								k_last_ping++;
+					if (!Ctrl->C.active) {			/* The bathymetry case */
+						for (col = 0; col < n_beams; col++) {
+							D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
+							D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
+							D->table[0]->segment[2]->data[col][n_pings] = -Ctrl->data.bath[col];
+						}
+						for (col = n_beams; col < n_beams_max; col++) {		/* NaNify the remaining beams of this ping */
+							D->table[0]->segment[0]->data[col][n_pings] = NaN;
+							D->table[0]->segment[1]->data[col][n_pings] = NaN;
+							D->table[0]->segment[2]->data[col][n_pings] = NaN;
+						}
+						if (Ctrl->A.active) {		/* Convert all flagged beams to NaN or add a cte value */
+							if (Ctrl->A.no_flags && esf.nedit > 0) {
+								found = false;
+								while (k_last_ping <= esf.nedit && esf.edit[k_last_ping].time_d < Ctrl->data.time_d) {
+									found = true;
+									k_last_ping++;
+								}
+								if (found) {
+									k = k_last_ping;
+									while (esf.edit[k].time_d == esf.edit[k+1].time_d && k < esf.nedit) {
+										if (esf.edit[k].action != MBP_EDIT_UNFLAG)
+											Ctrl->data.beamflag[esf.edit[k].beam] = 1;
+										k++;
+									}
+								}
 							}
-							if (found) {
-								k = k_last_ping;
-								while (esf.edit[k].time_d == esf.edit[k+1].time_d && k < esf.nedit) {
-									if (esf.edit[k].action != MBP_EDIT_UNFLAG)
-										Ctrl->data.beamflag[esf.edit[k].beam] = 1;
-									k++;
+							if (Ctrl->A.value) {
+								for (col = 0; col < n_beams; col++)
+									if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] += Ctrl->A.value;
+							}
+							else {
+								for (col = 0; col < n_beams; col++) {
+									if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] = NaN;
 								}
 							}
 						}
-						if (Ctrl->A.value) {
-							for (col = 0; col < n_beams; col++)
-								if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] += Ctrl->A.value;
+					}
+					else if (Ctrl->C.type == 0) {	/* The SideScan case */
+						for (col = 0; col < n_beams_max; col++)
+							if (Ctrl->data.ss[col] == -1000000000) Ctrl->data.ss[col] = NaN;
+
+						for (col = 0; col < n_beams_max; col++) {
+							D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.sslon[col];
+							D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.sslat[col];
+							D->table[0]->segment[2]->data[col][n_pings] = Ctrl->data.ss[col];
 						}
-						else {
-							for (col = 0; col < n_beams; col++) {
-								if (Ctrl->data.beamflag[col]) D->table[0]->segment[2]->data[col][n_pings] = NaN;
-							}
+					}
+					else {							/* The Amplitude case */
+						for (col = 0; col < n_beams_max; col++) {
+							D->table[0]->segment[0]->data[col][n_pings] = Ctrl->data.bathlon[col];
+							D->table[0]->segment[1]->data[col][n_pings] = Ctrl->data.bathlat[col];
+							D->table[0]->segment[2]->data[col][n_pings] = Ctrl->data.amp[col];
 						}
 					}
 					n_pings++;
@@ -631,9 +675,11 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 				else if (error > MB_ERROR_NO_ERROR)
 					done = true;
 			}
-			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
-			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
-			GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
+			if (n_beams_max) {
+				GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[0]);
+				GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[1]);
+				GMT_Alloc_Segment(API, GMT_NO_STRINGS, (uint64_t)n_pings, (uint64_t)n_beams_max, NULL, D->table[0]->segment[2]);
+			}
 			mb_close(verbose,&Ctrl->mbio_ptr,&error);
 			index[n_files] = n_pings;		/* Store the index at which a new file comes in contributing to out data */
 			if (Ctrl->A.active && esf.nedit > 0 || esf.esffp != NULL) {
@@ -659,14 +705,14 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	if (Ctrl->read_datalist == MB_YES)
 		mb_datalist_close(verbose, &Ctrl->datalist, &error);
 
-	if (GMT_Write_Data(API, GMT_IS_DATASET, GMT_IS_FILE, GMT_IS_POINT, GMT_WRITE_SET, NULL, Ctrl->M.file, D) != GMT_OK)
+	if (n_beams_max && (GMT_Write_Data(API, GMT_IS_DATASET, GMT_IS_FILE, GMT_IS_POINT, GMT_WRITE_SET, NULL, Ctrl->M.file, D) != GMT_OK))
 		return EXIT_FAILURE;
 
-	if (Ctrl->N.active) {
+	if (Ctrl->N.active) {			/* Have no idea anymore what this option is for */
 		int n;
 		dim[0] = 1;		dim[1] = 1;		dim[2] = n_files;	dim[3] = 1;
 		if ((D2 = GMT_Create_Data(API, GMT_IS_DATASET, GMT_IS_POINT, GMT_CONTAINER_AND_DATA,
-		                         dim, NULL, NULL, 0, 0, NULL)) == NULL) {
+		                          dim, NULL, NULL, 0, 0, NULL)) == NULL) {
 			GMT_Report(API, GMT_MSG_NORMAL, "Could not create Matrix structure\n");
 			gmt_M_free(GMT, index);
 			return EXIT_FAILURE;
