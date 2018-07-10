@@ -673,7 +673,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				len1=(int)strspn(format_description,"Formatname: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
-				string[len2] = '\0'
+				string[len2] = '\0';
 				print(output,"\"format_name\": \"%s\",\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"InformalDescription: ");
@@ -697,13 +697,13 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 				len1=(int)strspn(format_description,"Formatname: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
-				string[len2] = '\0'
+				string[len2] = '\0';
 				print(output,"\t\t<format_name>%s</format_name>\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"InformalDescription: ");
 				len2=(int)strcspn(&format_description[len1],"\n");
 				strncpy(string,&format_description[len1],len2);
-				string[len2] = '\0'
+				string[len2] = '\0';
 				print(output,"\t\t<informal_description>%s</informal_description>\n",string);PR
 				len1+=len2+1;
 				len1+=(int)strspn(&format_description[len1],"Attributes: ");
