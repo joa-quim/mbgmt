@@ -54,6 +54,8 @@ install (PROGRAMS
 	${PATO_BIN}/mbnavadjust.exe
 	${PATO_BIN}/mbnavedit.exe
 	${PATO_BIN}/mbnavlist.exe
+	${PATO_BIN}/mbnavadjustmerge.exe
+	${PATO_BIN}/mbnavadjusttest.exe
 	${PATO_BIN}/mbneptune2esf.exe
 	${PATO_BIN}/mbpreprocess.exe
 	${PATO_BIN}/mbprocess.exe
@@ -70,6 +72,9 @@ install (PROGRAMS
 	${PATO_BIN}/mbstripnan.exe
 	${PATO_BIN}/mbsvplist.exe
 	${PATO_BIN}/mbswplspreprocess.exe
+	${PATO_BIN}/mbmakeplatform.exe
+	${PATO_BIN}/mbminirovnav.exe
+	${PATO_BIN}/mbsvpselect.exe 
 	${PATO_BIN}/mbtime.exe
 	${PATO_BIN}/mbvelocitytool.exe
 	${PATO_BIN}/mbm_bpr
