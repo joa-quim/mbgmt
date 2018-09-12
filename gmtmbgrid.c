@@ -1728,7 +1728,7 @@ L4000:
 	;
 	if (verbose)
 		if (iter % 10 == 0)
-			fprintf(stderr,"Iteration %d of a maximum of %d\r", iter, itmax); 
+			fprintf(stderr,"Iteration %lld of a maximum of %lld\r", iter, itmax); 
     }
 L4010:
 	if (verbose) fprintf(stderr,"\n");
