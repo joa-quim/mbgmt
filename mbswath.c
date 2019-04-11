@@ -718,30 +718,20 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	gmt_map_clip_on (GMT, GMT->session.no_rgb, 3);
 
 	/* Read the color palette file */
-	if (Ctrl->C.active)
-                {   /* Read palette file */
-#if GMT_MAJOR_VERSION < 6
+	if (Ctrl->C.active) {   /* Read palette file */
 		if ((CPTcolor = gmt_get_cpt (GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0)) == NULL) {
-#else
-		if ((CPTcolor = gmt_get_cpt (GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL) {
-#endif
 			Return (API->error);
-			}
-                if (CPTcolor && CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
-                        Ctrl->image_type = MBSWATH_IMAGE_8;
-        	}
+		}
+		if (CPTcolor && CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
+			Ctrl->image_type = MBSWATH_IMAGE_8;
+	}
 
 	/* Read the color palette file for amplitude shading if requested */
-	if (Ctrl->N.active)
-                {   /* Read palette file */
-#if GMT_MAJOR_VERSION < 6
+	if (Ctrl->N.active) {   /* Read palette file */
 		if ((CPTshade = gmt_get_cpt (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0)) == NULL) {
-#else
-		if ((CPTshade = gmt_get_cpt (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL) {
-#endif
 			Return (API->error);
-			}
-        	}
+		}
+	}
                 
         /* Set particulars of output image for the postscript plot */
 	gmt_geo_to_xy(GMT, GMT->common.R.wesn[0], GMT->common.R.wesn[2], &Ctrl->clipx[0], &Ctrl->clipy[0]);

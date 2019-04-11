@@ -904,7 +904,7 @@ int GMT_mbgrdtiff (void *V_API, int mode, void *args)
 	/* Get/calculate a color palette file */
 	if (!Ctrl->I.do_rgb) {
 		if (Ctrl->C.active) {		/* Read palette file */
-			if ((P = gmt_get_cpt (GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max, 0)) == NULL) {
+			if ((P = gmt_get_cpt (GMT, Ctrl->C.file, GMT_CPT_OPTIONAL, header_work->z_min, header_work->z_max)) == NULL) {
 				Return (API->error);
 			}
 			gray_only = (P && P->is_gray);

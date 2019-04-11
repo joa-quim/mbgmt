@@ -1,13 +1,12 @@
 # List of extra  files to include in the installer
-SET (PATO_MB  "C:/progs_cygw/MB-GMT5/compileds/VC12_64")
+SET (PATO_MB  "C:/progs_cygw/MB-GMT5/compileds/${VC}_${BITAGE}")
 SET (PATO_BIN "${PATO_MB}/bin")
 SET (PATO_LIB "${PATO_MB}/bin")
 install (PROGRAMS 
-	C:/programs/compa_libs/X11/compileds/VC12_64/lib/libX11.dll
-	C:/programs/compa_libs/X11/compileds/VC12_64/lib/libXcb.dll
-	C:/programs/compa_libs/X11/compileds/VC12_64/lib/libXau.dll
-	C:/programs/compa_libs/X11/compileds/VC12_64/lib/libXext.dll
-	C:/programs/compa_libs/oncrpc/compileds/VC12_64/lib/oncrpc_w64.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libX11.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXcb.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXau.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXext.dll
 	${PATO_LIB}/mbaux_w64.dll
 	${PATO_LIB}/mbio_w64.dll
 	${PATO_LIB}/mbview_w64.dll

@@ -1,20 +1,20 @@
 # List of extra  files to include in the installer
-SET (PATO_MB  "C:/progs_cygw/MB-GMT5/compileds/VC12_32")
+SET (PATO_MB  "C:/progs_cygw/MB-GMT5/compileds/${VC}_${BITAGE}")
 SET (PATO_BIN "${PATO_MB}/bin")
 SET (PATO_LIB "${PATO_MB}/bin")
 install (PROGRAMS 
-	C:/programs/compa_libs/fftw-3.3.4/compileds/VC12_32/lib/libfftw-3.3_w32.dll
-	C:/programs/compa_libs/libiconv-1.14/compileds/VC12_32/lib/libiconv_w32.dll
-	C:/programs/compa_libs/lpng166/compileds/VC12_32/lib/libpng_w32.dll
-	C:/programs/compa_libs/pcre_SVN/compileds/VC12_32/lib/pcreposix_w32.dll
-	C:/programs/compa_libs/hdf-4.2.9/compileds/VC12_32/lib/xdr_w32.dll 
-	C:/programs/compa_libs/xerces-c-3.1.1/compileds/VC12_32/lib/xerces-c_3_1_w32.dll 
-	C:/programs/compa_libs/X11/compileds/VC12_32/lib/libX11.dll
-	C:/programs/compa_libs/X11/compileds/VC12_32/lib/libXcb.dll
-	C:/programs/compa_libs/X11/compileds/VC12_32/lib/libXau.dll
-	C:/programs/compa_libs/X11/compileds/VC12_32/lib/libXext.dll
-	C:/programs/compa_libs/libxml2-2.9.1/compileds/VC12_32/lib/libxml2_w32.dll
-	C:/programs/compa_libs/oncrpc/compileds/VC12_32/lib/oncrpc_w32.dll
+	C:/programs/compa_libs/fftw-3.3.4/compileds/${VC}_${BITAGE}/lib/libfftw-3.3_w32.dll
+	C:/programs/compa_libs/libiconv-1.14/compileds/${VC}_${BITAGE}/lib/libiconv_w32.dll
+	C:/programs/compa_libs/lpng166/compileds/${VC}_${BITAGE}/lib/libpng_w32.dll
+	C:/programs/compa_libs/pcre_SVN/compileds/${VC}_${BITAGE}/lib/pcreposix_w32.dll
+	C:/programs/compa_libs/hdf-4.2.9/compileds/${VC}_${BITAGE}/lib/xdr_w32.dll 
+	C:/programs/compa_libs/xerces-c-3.1.1/compileds/${VC}_${BITAGE}/lib/xerces-c_3_1_w32.dll 
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libX11.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXcb.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXau.dll
+	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXext.dll
+	C:/programs/compa_libs/libxml2-2.9.1/compileds/${VC}_${BITAGE}/lib/libxml2_w32.dll
+	C:/programs/compa_libs/oncrpc/compileds/${VC}_${BITAGE}/lib/oncrpc_w32.dll
 	${PATO_LIB}/mbaux_w32.dll
 	${PATO_LIB}/mbio_w32.dll
 	${PATO_LIB}/mbview_w32.dll
