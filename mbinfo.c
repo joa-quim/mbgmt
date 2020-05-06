@@ -27,10 +27,11 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbinfo"
+#define THIS_MODULE_CLASSIC_NAME	"mbinfo"
+#define THIS_MODULE_MODERN_NAME	"mbinfo"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Read a swath sonar data file and outputs some basic statistics."
-#define THIS_MODULE_KEYS	"<D{,>D},>DC,>DO" 
+#define THIS_MODULE_KEYS	"<D{,>D},>DC,>DO"
 #define THIS_MODULE_NEEDS	""
 #define THIS_MODULE_OPTIONS "->RUV"
 
@@ -93,7 +94,7 @@ GMT_LOCAL void Free_Ctrl(struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl) {	/* De
 }
 
 GMT_LOCAL int usage(struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbinfo -I<inputfile>\n");
 
@@ -384,7 +385,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 	if (GMT_Parse_Common(API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBINFO_CTRL *)New_Ctrl(GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse(GMT, Ctrl, options))) Return (error);

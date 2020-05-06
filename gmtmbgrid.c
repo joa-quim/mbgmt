@@ -37,7 +37,8 @@
 /* GMT include files */
 #include "gmt_dev.h"
 
-#define THIS_MODULE_NAME	"mbgmtgrid"
+#define THIS_MODULE_CLASSIC_NAME	"mbgmtgrid"
+#define THIS_MODULE_MODERN_NAME	"mbgmtgrid"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Grid table data using adjustable tension continuous curvature splines"
 #define THIS_MODULE_KEYS	"<D{,DD(,LG(,GG}"
@@ -286,7 +287,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct GMTMBGRID_CTRL *C) {	/* D
 
 GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 
 	GMT_Message (API, GMT_TIME_NONE, "usage: gmtmbgrid [<table>] -G<outgrid> %s\n", GMT_I_OPT);
@@ -515,7 +516,7 @@ int GMT_gmtmbgrid (void *V_API, int mode, void *args) {
 	if (options->option == GMT_OPT_SYNOPSIS) bailout (usage (API, GMT_SYNOPSIS));	/* Return the synopsis */
 
 	/* Parse the commont GMT command-line options */
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);
 	Ctrl = New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options)) != 0) Return (error);
@@ -574,13 +575,13 @@ int GMT_gmtmbgrid (void *V_API, int mode, void *args) {
 	gmt_M_err_fail (GMT, gmt_grd_RI_verify (GMT, C.Grid->header, 1), Ctrl->G.file);
 	gmt_set_grddim (GMT, C.Grid->header);
 
-	if (C.Grid->header->nx < 4 || C.Grid->header->ny < 4) {
-		GMT_Report (API, GMT_MSG_NORMAL, "Error: Grid must have at least 4 nodes in each direction (you have %d by %d) - abort.\n", C.Grid->header->nx, C.Grid->header->ny);
+	if (C.Grid->header->n_columns < 4 || C.Grid->header->n_rows < 4) {
+		GMT_Report (API, GMT_MSG_NORMAL, "Error: Grid must have at least 4 nodes in each direction (you have %d by %d) - abort.\n", C.Grid->header->n_columns, C.Grid->header->n_rows);
 		Return (EXIT_FAILURE);
 	}
 
-	C.nx = C.Grid->header->nx;
-	C.ny = C.Grid->header->ny;
+	C.nx = C.Grid->header->n_columns;
+	C.ny = C.Grid->header->n_rows;
 	C.nxny = C.Grid->header->nm;
 
 	C.mx = C.nx + 4;
@@ -842,19 +843,20 @@ int GMT_gmtmbgrid (void *V_API, int mode, void *args) {
 		if ((object_ID = GMT_Register_IO (API, GMT_IS_GRID, GMT_IS_REFERENCE|GMT_IO_RESET, GMT_IS_SURFACE, GMT_IN, NULL, bg_grid)) == GMT_NOTSET) 
 			Return (API->error);
 
-		if (GMT_Encode_ID (API, in_string, object_ID) != GMT_OK)
-			Return (API->error);	/* Make filename with embedded object ID for grid G */
+		/* MUST USE Virtual files instead. This was broken by GMT6.1 */
+		//if (api_encode_id (API, in_string, object_ID) != GMT_OK)
+			//Return (API->error);	/* Make filename with embedded object ID for grid G */
 
 		if ((object_ID = GMT_Register_IO (API, GMT_IS_GRID, GMT_IS_REFERENCE, GMT_IS_SURFACE, GMT_OUT, NULL, NULL)) == GMT_NOTSET)
 			Return (API->error);
 
-		if (GMT_Encode_ID (API, out_string, object_ID) != GMT_OK)
-			Return (API->error);	/* Make filename with embedded object ID for result grid G2 */
+		//if (api_encode_id (API, out_string, object_ID) != GMT_OK)
+			//Return (API->error);	/* Make filename with embedded object ID for result grid G2 */
 
 		sprintf (cmd, "%s -G%s -I%d+/%d+", in_string, out_string, C.nx, C.ny);
 		if (GMT_grdsample (API, 0, cmd) != GMT_OK) return (API->error);	/* Do the resampling */
-		if ((G2 = GMT_Retrieve_Data (API, object_ID)) == NULL)
-			Return (API->error);
+		//if ((G2 = api_retrieve_data (API, object_ID)) == NULL)
+			//Return (API->error);
 
 		if (GMT_Destroy_Data (API, &bg_grid) != GMT_OK)
 			Return (API->error);
@@ -957,11 +959,11 @@ int GMT_gmtmbgrid (void *V_API, int mode, void *args) {
 	GMT_Report (API, GMT_MSG_VERBOSE, "Minimum value: %10.2f   Maximum value: %10.2f\n", zmin,zmax);
 
 	/* write output file */
-	output = gmt_M_memory (GMT, NULL, (size_t)(h->nx * h->ny), float);
-	for (i = 0; i < h->nx; i++) {
-		for (j = 0; j < h->ny; j++) {
+	output = gmt_M_memory (GMT, NULL, (size_t)(h->n_columns * h->n_rows), float);
+	for (i = 0; i < h->n_columns; i++) {
+		for (j = 0; j < h->n_rows; j++) {
 			kgrid = (i + C.offx) * C.gydim + (j + C.offy);
-			kout = (h->ny - 1 - j) * h->nx + i;
+			kout = (h->n_rows - 1 - j) * h->n_columns + i;
 			output[kout] = (float) C.grid_aux[kgrid];
 			if (C.grid_aux[kgrid] == clipvalue)
 				output[kout] = outclipvalue;
@@ -996,12 +998,12 @@ int read_data_surface (struct GMT_CTRL *GMT, struct GMTMBGRID_INFO *C, struct GM
 	/* calculate other grid properties */
 	factor = 4.0 / (C->scale * C->scale * C->Grid->header->inc[GMT_X] * C->Grid->header->inc[GMT_Y]);
 	if (C->extend > 0) {		/* Otherwise offx|y are 0 */
-		C->offx = (int) (C->extend * C->Grid->header->nx);
-		C->offy = (int) (C->extend * C->Grid->header->ny);
+		C->offx = (int) (C->extend * C->Grid->header->n_columns);
+		C->offy = (int) (C->extend * C->Grid->header->n_rows);
 	}
 	xtradim = (int)C->scale + 2;
-	gxdim   = C->Grid->header->nx + 2 * C->offx;
-	gydim   = C->Grid->header->ny + 2 * C->offy;
+	gxdim   = C->Grid->header->n_columns + 2 * C->offx;
+	gydim   = C->Grid->header->n_rows + 2 * C->offy;
 	bounds[0] = wbnd[0] = C->Grid->header->wesn[XLO] - C->offx * C->Grid->header->inc[GMT_X];
 	bounds[1] = wbnd[1] = C->Grid->header->wesn[XHI] + C->offx * C->Grid->header->inc[GMT_X];
 	bounds[2] = wbnd[2] = C->Grid->header->wesn[YLO] - C->offy * C->Grid->header->inc[GMT_Y];
@@ -3117,9 +3119,9 @@ int interp_breakline(struct GMT_CTRL *GMT, struct GMTMBGRID_INFO *C, float *norm
 	r_dy = 1. / h->inc[GMT_Y]; 
 	for (i = 0; i < xyzline->n_segments; i++) {
 		for (j = 0; j < xyzline->segment[i]->n_rows - 1; j++) {
-			dx = xyzline->segment[i]->coord[GMT_X][j+1] - xyzline->segment[i]->coord[GMT_X][j];
-			dy = xyzline->segment[i]->coord[GMT_Y][j+1] - xyzline->segment[i]->coord[GMT_Y][j];
-			dz = xyzline->segment[i]->coord[GMT_Z][j+1] - xyzline->segment[i]->coord[GMT_Z][j];
+			dx = xyzline->segment[i]->data[GMT_X][j+1] - xyzline->segment[i]->data[GMT_X][j];
+			dy = xyzline->segment[i]->data[GMT_Y][j+1] - xyzline->segment[i]->data[GMT_Y][j];
+			dz = xyzline->segment[i]->data[GMT_Z][j+1] - xyzline->segment[i]->data[GMT_Z][j];
 			n_int = (int)(lrint( MAX( fabs(dx) * r_dx, fabs(dy) * r_dy ) ) + 1);
 			this_end += n_int;
 
@@ -3134,13 +3136,13 @@ int interp_breakline(struct GMT_CTRL *GMT, struct GMTMBGRID_INFO *C, float *norm
 			dy /= (floor(n_int) - 1);
 			dz /= (floor(n_int) - 1);
 			for (k = this_ini, n = 0; k < this_end - 1; k++, n++) {
-				x[k] = xyzline->segment[i]->coord[GMT_X][j] + n * dx;
-				y[k] = xyzline->segment[i]->coord[GMT_Y][j] + n * dy;
-				z[k] = xyzline->segment[i]->coord[GMT_Z][j] + n * dz;
+				x[k] = xyzline->segment[i]->data[GMT_X][j] + n * dx;
+				y[k] = xyzline->segment[i]->data[GMT_Y][j] + n * dy;
+				z[k] = xyzline->segment[i]->data[GMT_Z][j] + n * dz;
 			}
-			x[this_end - 1] = xyzline->segment[i]->coord[GMT_X][j+1];
-			y[this_end - 1] = xyzline->segment[i]->coord[GMT_Y][j+1];
-			z[this_end - 1] = xyzline->segment[i]->coord[GMT_Z][j+1];
+			x[this_end - 1] = xyzline->segment[i]->data[GMT_X][j+1];
+			y[this_end - 1] = xyzline->segment[i]->data[GMT_Y][j+1];
+			z[this_end - 1] = xyzline->segment[i]->data[GMT_Z][j+1];
 
 			this_ini += n_int;
 		}

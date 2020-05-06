@@ -31,10 +31,11 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbswath"
+#define THIS_MODULE_CLASSIC_NAME	"mbswath"
+#define THIS_MODULE_MODERN_NAME	"mbswath"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
-#define THIS_MODULE_KEYS	"CC(,NC("
+#define THIS_MODULE_KEYS	"CC(,NC(,>X}"
 #define THIS_MODULE_NEEDS	"gJ"
 #define THIS_MODULE_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
@@ -354,7 +355,7 @@ void Free_mbswath_Ctrl (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl) {	/* De
 
 int GMT_mbswath_usage (struct GMTAPI_CTRL *API, int level)
 {
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbswath -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
@@ -408,7 +409,7 @@ int GMT_mbswath_parse (struct GMT_CTRL *GMT, struct MBSWATH_CTRL *Ctrl, struct G
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+#if GMT_MAJOR_VERSION < 6 && GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
  				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
 #else
 				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
@@ -667,9 +668,9 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options))
                 Return (API->error);

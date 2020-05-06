@@ -27,6 +27,8 @@
 extern "C" {
 #endif
 
+#define GMT_MBGMT_STRING "GMT mbgmt: The JL's build of the MB-System supplements to the Generic Mapping Tools"
+
 /* Declaration modifiers for DLL support (MSC et al) */
 #include "declspec.h"
 
@@ -45,19 +47,19 @@ EXTERN_MSC int GMT_mbswath   (void *API, int mode, void *args);
 EXTERN_MSC int GMT_gmtmbgrid (void *API, int mode, void *args);
 
 /* Pretty print all modules in the MBGMT library and their purposes */
-EXTERN_MSC void gmt_mbgmt_module_show_all(void *API);
+//EXTERN_MSC void gmtlib_mbgmt_module_show_all(void *API);
 
 /* List all modules in the MBGMT library to stdout */
-EXTERN_MSC void gmt_mbgmt_module_list_all(void *API);
+//EXTERN_MSC void gmtlib_mbgmt_module_list_all(void *API);
 
 /* Undocumented API function for developers to get information about a module */
-EXTERN_MSC const char *gmt_mbgmt_module_info(void *API, char *candidate);
+//EXTERN_MSC void gmtlib_mbgmt_module_classic_all(void *API);
 
 /* Lookup module id by name, return option keys pointer (for external API developers) */
-EXTERN_MSC const char *gmt_mbgmt_module_keys(void *API, char *candidate);
+//EXTERN_MSC const char *gmtlib_mbgmt_module_keys(void *API, char *candidate);
 
 /* Lookup module id by name, return group char name (for external API developers) */
-EXTERN_MSC const char *gmt_mbgmt_module_group(void *API, char *candidate);
+//EXTERN_MSC const char *gmtlib_mbgmt_module_group(void *API, char *candidate);
 
 #ifdef __cplusplus
 }

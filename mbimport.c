@@ -20,7 +20,8 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbimport"
+#define THIS_MODULE_CLASSIC_NAME	"mbimport"
+#define THIS_MODULE_MODERN_NAME	"mbimport"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS	"<D{,CC(,MI}"
@@ -293,7 +294,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Dealloca
 }
 
 GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbimport -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
@@ -578,9 +579,9 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
@@ -643,7 +644,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file */
 	if (Ctrl->C.active) {
-		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL)
+		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL)
 			Return (API->error);
 		if (CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
 			Ctrl->image_type = MBSWATH_IMAGE_8;
@@ -663,11 +664,11 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 			Ctrl->image_type = MBSWATH_IMAGE_8;
 		}
 
-		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
+		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0.0, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
 			Return (API->error);
 		gmt_scale_cpt (GMT, CPTcolor, -1);		/* Flip the color scale because Z is pos down (Blheak) */
-		CPTcolor->data->z_low = CPTcolor->range->z_low = zmin;
-		CPTcolor->data->z_high = CPTcolor->range->z_high = zmax;
+		CPTcolor->data->z_low = zmin;
+		CPTcolor->data->z_high = zmax;
 
 		if (CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
 			Ctrl->image_type = MBSWATH_IMAGE_8;
@@ -675,7 +676,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file for amplitude shading if requested */
 	if (Ctrl->N.active) {
-		if ((CPTshade = gmt_get_palette (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0, 0, 0)) == NULL)
+		if ((CPTshade = gmt_get_palette (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL)
 			Return (API->error);
 	}
 
@@ -1025,7 +1026,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 	I->data = Ctrl->bitimage;
 
 	I->type = GMT_CHAR;
-	I->header->nx = (uint32_t)dim[GMT_X];	I->header->ny = (uint32_t)dim[GMT_Y];	I->header->n_bands = (uint32_t)dim[GMT_Z];
+	I->header->n_columns = (uint32_t)dim[GMT_X];	I->header->n_rows = (uint32_t)dim[GMT_Y];	I->header->n_bands = (uint32_t)dim[GMT_Z];
 	I->header->registration = GMT_GRID_PIXEL_REG;
 	gmt_M_memcpy (I->header->mem_layout, "TCBa", 4, char);  /* Signal that data is Band interleaved */
 	gmt_M_grd_setpad (GMT, I->header, nopad);               /* Copy the no pad to the header */

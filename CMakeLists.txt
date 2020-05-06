@@ -1,7 +1,6 @@
 #
-# $Id: CMakeLists.txt 11838 2013-06-28 06:49:32Z pwessel $
 #
-# Copyright (c) 1991-2015 by P. Wessel, W. H. F. Smith, R. Scharroo, J. Luis, and F. Wobbe
+# Copyright (c) 1991-2020 by the GMT Team (https://www.generic-mapping-tools.org/team.html)
 # See LICENSE.TXT file for copying and redistribution conditions.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -13,29 +12,25 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
-# Contact info: http://www.soest.hawaii.edu/PT/GSFML
+# Contact info: www.generic-mapping-tools.org
 #-------------------------------------------------------------------------------
+#
+# CMake settings for supplemental package:
+#
+# 	SUPPL_NAME:          name of the supplemental package
+#   SUPPL_HEADERS:       header files. Will be installed if BUILD_SUPPLEMENTS is TRUE
+#   SUPPL_PROGS_SRCS:    list of C source codes for supplemental modules
+#   SUPPL_LIB_SRCS:      list of C source codes for supplemental library
+#   SUPPL_EXAMPLE_FILES: README and other example files
+#   SUPPL_EXAMPLE_PROGS: Example scripts
+#
 
-# ==> Modules in this custom library [add the ones you have]:
+set (SUPPL_NAME mbgmt)
+set (SUPPL_LIB_NAME mbgmt)
 set (SUPPL_PROGS_SRCS mbcontour.c mbswath.c mbgrdtiff.c mbclean_j.c mbgrid_j.c mbimport.c
 	mbgetdata.c mbflags.c mbset.c mbinfo.c mbareaclean.c gmtmbgrid.c mbprocess.c)
-#=========================================================================
-# Most likely no changes below here
+set (SUPPL_LIB_SRCS ${SUPPL_PROGS_SRCS})
+set (SUPPL_EXTRA_INCLUDES ${ONCRPCINC} ${GETOPTINC} ${PROJINCDIR} ${MBINC} ${PTHREADINC})
+set (SUPPL_EXTRA_LIBS ${PROJLIB} ${ONCRPCLIB} ${GETOPTLIB} ${PTHREADLIB} ${MBIOLIB} ${MBAUXLIB})
 
-# Find libraries
-message (STATUS "Searching dependent libraries. This may take a few minutes...")
-
-# lib sources
-set (LIB_SRCS ${SUPPL_PROGS_SRCS})
-
-# create build targets
-string (REPLACE ".c" "" _gmt_modules "${SUPPL_PROGS_SRCS}")
-install_module_symlink (${_gmt_modules})
-
-# this prints out the final version of the compiler/linker flags
-string (TOUPPER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_UPPER)
-string(REGEX REPLACE "[ ]+" " " _using_cflags ${CMAKE_C_FLAGS} " "
-	${CMAKE_C_FLAGS_${CMAKE_BUILD_TYPE_UPPER}})
-message (STATUS "Using CFLAGS = '${_using_cflags}'")
-
-# vim: textwidth=78 noexpandtab tabstop=2 softtabstop=2 shiftwidth=2
+set (SUPPL_DLL_RENAME ${MB_DLL_RENAME})

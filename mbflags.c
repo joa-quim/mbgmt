@@ -9,7 +9,8 @@
  * Date:	May, 2017
  */
 
-#define THIS_MODULE_NAME	"mbflags"
+#define THIS_MODULE_MODERN_NAME	"mbflags"
+#define THIS_MODULE_CLASSIC_NAME	"mbflags"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Update the flags .esf file from external file"
 #define THIS_MODULE_KEYS	""
@@ -97,7 +98,7 @@ void Free_MBFLAGS_CTRL (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl) {	/* De
 
 GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbflags -I<inputfile> -Fflags_file -V\\n");
 
@@ -293,9 +294,9 @@ int GMT_mbflags (void *V_API, int mode, void *args) {
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return(API->error);
                

@@ -32,7 +32,8 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbset"
+#define THIS_MODULE_CLASSIC_NAME	"mbset"
+#define THIS_MODULE_MODERN_NAME	"mbset"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Set values in an mbprocess parameter file"
 #define THIS_MODULE_KEYS	""
@@ -110,7 +111,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl) {	/* De
 }
 
 GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbset -Iinfile -PPARAMETER:value [-E -L -N -V]\n");
 	GMT_Message(API, GMT_TIME_NONE, "MB-System Version %s\n",MB_VERSION);
@@ -266,9 +267,9 @@ int GMT_mbset (void *V_API, int mode, void *args) {
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBSET_CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */

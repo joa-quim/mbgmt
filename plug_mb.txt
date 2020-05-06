@@ -19,22 +19,15 @@ if (UNIX)
 endif (UNIX)
 foreach (_dir ${THIS_PLUGG_SUPPL_DIRS})
 	add_subdirectory (${_dir})
-	list (APPEND GMT_BINARY_DIR_PATH
-		"${CMAKE_CURRENT_BINARY_DIR}/${_dir}/\${CMAKE_CONFIG_TYPE:-.}")
+	list (APPEND GMT_BINARY_DIR_PATH "${CMAKE_CURRENT_BINARY_DIR}/${_dir}/\${CMAKE_CONFIG_TYPE:-.}")
 endforeach (_dir)
 # supplement library files
-get_subdir_var_files (THIS_PLUGG_LIB_SRCS LIB_SRCS ${THIS_PLUGG_SUPPL_DIRS})
+#get_subdir_var_files (THIS_PLUGG_LIB_SRCS LIB_SRCS ${THIS_PLUGG_SUPPL_DIRS})
 
 # include supplement directories
 foreach (_dir ${THIS_PLUGG_SUPPL_DIRS})
 	include_directories (${CMAKE_CURRENT_BINARY_DIR}/${_dir})
 endforeach (_dir)
-
-# Extra includes
-include_directories(${ONCRPCINC})
-include_directories(${GETOPTINC})
-include_directories(${PROJINCDIR})
-include_directories(${MBINC})
 
 if (WIN32)
 	add_library (${THIS_PLUGG_NAME}

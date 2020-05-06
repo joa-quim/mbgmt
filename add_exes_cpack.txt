@@ -2,17 +2,23 @@
 SET (PATO_MB  "C:/progs_cygw/MB-System/compileds/${VC}_${BITAGE}")
 SET (PATO_BIN "${PATO_MB}/bin")
 SET (PATO_LIB "${PATO_MB}/bin")
+SET (PATO_GDAL_BIN  "C:/programs/compa_libs/gdal_GIT/compileds/${VC}_${BITAGE}/bin")
+SET (PATO_PROJ_BIN  "C:/programs/compa_libs/proj5_GIT/compileds/${VC}_${BITAGE}/bin")
+SET (PATO_FFMPEG_BIN  "C:/programs/compa_libs/ffmpeg/vcpkg_bin")
+
 install (PROGRAMS 
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libX11.dll
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXcb.dll
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXau.dll
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXext.dll
-	C:/programs/compa_libs/oncrpc/compileds/${VC}_${BITAGE}/lib/oncrpc_w64.dll
+	C:/programs/compa_libs/oncrpc/compileds/${VC}_${BITAGE}/lib/oncrpc_w${BITAGE}.dll
+	C:/programs/compa_libs/pthreads/compileds/${VC}_${BITAGE}/bin/pthreadVC2_w${BITAGE}.dll
 	${PATO_LIB}/mbaux_w${BITAGE}.dll
 	${PATO_LIB}/mbio_w${BITAGE}.dll
 	${PATO_LIB}/mbview_w${BITAGE}.dll
 	${PATO_LIB}/mbbsio_w${BITAGE}.dll
 	${PATO_LIB}/mbgsf_w${BITAGE}.dll
+	${PATO_LIB}/mbtrn_w${BITAGE}.dll
 	${PATO_LIB}/sapi_w${BITAGE}.dll
 	${PATO_BIN}/mb7k2jstar.exe
 	${PATO_BIN}/mb7k2ss.exe
@@ -77,6 +83,59 @@ install (PROGRAMS
 	DESTINATION ${GMT_BINDIR}
 	COMPONENT Runtime)
 
+install (PROGRAMS 
+	${PATO_GDAL_BIN}/gdaladdo.exe
+	${PATO_GDAL_BIN}/gdalbuildvrt.exe
+	${PATO_GDAL_BIN}/gdaldem.exe
+	${PATO_GDAL_BIN}/gdalenhance.exe
+	${PATO_GDAL_BIN}/gdalinfo.exe
+	${PATO_GDAL_BIN}/gdallocationinfo.exe
+	${PATO_GDAL_BIN}/gdalmanage.exe
+	${PATO_GDAL_BIN}/gdalserver.exe
+	${PATO_GDAL_BIN}/gdalsrsinfo.exe
+	${PATO_GDAL_BIN}/gdaltindex.exe
+	${PATO_GDAL_BIN}/gdaltransform.exe
+	${PATO_GDAL_BIN}/gdalwarp.exe
+	${PATO_GDAL_BIN}/gdal_contour.exe
+	${PATO_GDAL_BIN}/gdal_grid.exe
+	${PATO_GDAL_BIN}/gdal_rasterize.exe
+	${PATO_GDAL_BIN}/gdal_translate.exe
+	${PATO_GDAL_BIN}/gnmanalyse.exe
+	${PATO_GDAL_BIN}/gnmmanage.exe
+	${PATO_GDAL_BIN}/nearblack.exe
+	${PATO_GDAL_BIN}/ogr2ogr.exe
+	${PATO_GDAL_BIN}/ogrinfo.exe
+	${PATO_GDAL_BIN}/ogrlineref.exe
+	${PATO_GDAL_BIN}/ogrtindex.exe
+	${PATO_GDAL_BIN}/testepsg.exe
+	DESTINATION ${GMT_BINDIR}
+	COMPONENT Runtime)
+
+install (PROGRAMS 
+	${PATO_PROJ_BIN}/cct.exe
+	${PATO_PROJ_BIN}/cs2cs.exe
+	${PATO_PROJ_BIN}/geod.exe
+	${PATO_PROJ_BIN}/gie.exe
+	${PATO_PROJ_BIN}/nad2bin.exe
+	${PATO_PROJ_BIN}/proj.exe
+	${PATO_PROJ_BIN}/projinfo.exe
+	DESTINATION ${GMT_BINDIR}
+	COMPONENT Runtime)
+
+install (PROGRAMS 
+	${PATO_FFMPEG_BIN}/ffmpeg.exe
+	${PATO_FFMPEG_BIN}/atk-1.dll
+	${PATO_FFMPEG_BIN}/avcodec-58.dll
+	${PATO_FFMPEG_BIN}/avdevice-58.dll
+	${PATO_FFMPEG_BIN}/avfilter-7.dll
+	${PATO_FFMPEG_BIN}/avformat-58.dll
+	${PATO_FFMPEG_BIN}/avutil-56.dll
+	${PATO_FFMPEG_BIN}/swresample-3.dll
+	${PATO_FFMPEG_BIN}/swscale-5.dll
+	${PATO_FFMPEG_BIN}/lzma.dll
+	DESTINATION ${GMT_BINDIR}
+	COMPONENT Runtime)
+
 install (DIRECTORY ${PATO_MB}/share/mbsystem/
 	DESTINATION ${GMT_DATADIR}/mbsystem
 	COMPONENT MB)
@@ -86,3 +145,4 @@ install (PROGRAMS
 	${PATO_MB}/share/mbsystem/Projections.dat
 	DESTINATION ${GMT_DATADIR}/mbsystem
 	COMPONENT MB)
+

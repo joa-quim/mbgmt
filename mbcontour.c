@@ -34,10 +34,11 @@
  *
  */
 
-#define THIS_MODULE_NAME	"mbcontour"
+#define THIS_MODULE_CLASSIC_NAME	"mbcontour"
+#define THIS_MODULE_MODERN_NAME	"mbcontour"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
-#define THIS_MODULE_KEYS	">X}"
+#define THIS_MODULE_KEYS	"CC(,>X}"
 #define THIS_MODULE_NEEDS	"gJ"
 #define THIS_MODULE_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
@@ -253,7 +254,7 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 //	char help_message[] =  "mbcontour is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBCONTOUR in conjunction with the usual GMT programs.";
 //	char usage_message[] = "mbcontour -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
 
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbcontour -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
@@ -307,7 +308,7 @@ int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, stru
 		switch (opt->option) {
 			case '<':	/* Input file (only one or three is accepted) */
 				Ctrl->I.active = true;
-#if GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
+#if GMT_MAJOR_VERSION < 6 && GMT_MINOR_VERSION == 1 && GMT_RELEASE_VERSION < 2
 				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN)) {
 #else
 				if (gmt_check_filearg (GMT, '<', opt->arg, GMT_IN, GMT_IS_DATASET)) {
@@ -631,9 +632,9 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) {
 		fprintf(stderr,"Error from GMT_Parse_common():%d\n",API->error);
