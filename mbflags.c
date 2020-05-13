@@ -17,7 +17,7 @@
 #define THIS_MODULE_NEEDS	""
 #define THIS_MODULE_OPTIONS "->V"
 
-/* GMT5 header file */
+/* GMT header file */
 #include "gmt_dev.h"
 
 #define GMT_PROG_OPTIONS "->V"
@@ -78,7 +78,7 @@ struct MBFLAGS_CTRL {
 static char rcs_id[] = "$Id: mbflags.c  $";
 
 /*-----------------------------------------------------------------------------------------*/
-void *New_MBFLAGS_CTRL (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_MBFLAGS_CTRL (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct MBFLAGS_CTRL *Ctrl;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBFLAGS_CTRL);
@@ -88,7 +88,7 @@ void *New_MBFLAGS_CTRL (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new
 	return (Ctrl);
 }
 
-void Free_MBFLAGS_CTRL (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_MBFLAGS_CTRL (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 
 	if (Ctrl->I.file) free (Ctrl->I.file);
@@ -96,7 +96,7 @@ void Free_MBFLAGS_CTRL (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl) {	/* De
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
@@ -109,7 +109,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBFLAGS_CTRL *Ctrl, struct GMT_OPTION *options) {
 
 	unsigned int n_errors = 0, n_files = 0;
 	int    n;

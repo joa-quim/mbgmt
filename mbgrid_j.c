@@ -265,7 +265,7 @@ void Free_mbgrid_Ctrl (struct GMT_CTRL *GMT, struct MBGRID_CTRL *Ctrl) {	/* Deal
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
@@ -282,7 +282,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGRID_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBGRID_CTRL *Ctrl, struct GMT_OPTION *options) {
 
 	unsigned int n_errors = 0, n_files = 0;
 	int    n;

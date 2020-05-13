@@ -109,7 +109,7 @@ struct mbareaclean_sndg_struct {
 };
 
 /* Control structure for mbgetdata */
-GMT_LOCAL struct MBAREACLEAN_CTRL {
+static struct MBAREACLEAN_CTRL {
 	int     read_datalist;
 	void	*datalist;
 
@@ -164,7 +164,7 @@ GMT_LOCAL struct MBAREACLEAN_CTRL {
 	} T;
 };
 
-GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBAREACLEAN_CTRL *Ctrl;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBAREACLEAN_CTRL);
@@ -192,13 +192,13 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBAREACLEAN_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl (struct GMT_CTRL *GMT, struct MBAREACLEAN_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->I.file) free (Ctrl->I.file);
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbareaclean -Iinfile -PPARAMETER:value [-E -L -N -V]\n");
@@ -221,7 +221,7 @@ int flag_sounding(struct GMTAPI_CTRL *API, int verbose, int flag, int output_bad
 
 static char rcs_id[] = "$Id: mbareaclean.c 2298 2017-04-10 07:57:48Z caress $";
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBAREACLEAN_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBAREACLEAN_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.

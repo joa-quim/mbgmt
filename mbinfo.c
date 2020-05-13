@@ -48,7 +48,7 @@ EXTERN_MSC int GMT_mbinfo(void *API, int mode, void *args);
 #include "mb_io.h"
 
 #define MBINFO_MAXPINGS 50
-GMT_LOCAL struct ping {
+static struct ping {
 	char	*beamflag;
 	double	*bath;
 	double	*bathlon;
@@ -69,7 +69,7 @@ GMT_LOCAL struct ping {
 #define print sprintf
 
 /* Control structure for mbgetdata */
-GMT_LOCAL struct MBINFO_CTRL {
+static struct MBINFO_CTRL {
 	struct mbinfo_I {	/* -I<inputfile> */
 		bool active;
 		char *inputfile;
@@ -79,7 +79,7 @@ GMT_LOCAL struct MBINFO_CTRL {
 	} G;
 };
 
-GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBINFO_CTRL *Ctrl;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBINFO_CTRL);
@@ -87,13 +87,13 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-GMT_LOCAL void Free_Ctrl(struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl(struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage(struct GMTAPI_CTRL *API, int level) {
+static int usage(struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbinfo -I<inputfile>\n");
@@ -101,7 +101,7 @@ GMT_LOCAL int usage(struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBINFO_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.
@@ -390,7 +390,7 @@ int GMT_mbinfo(void *V_API, int mode, void *args) {
 	Ctrl = (struct MBINFO_CTRL *)New_Ctrl(GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse(GMT, Ctrl, options))) Return (error);
 
-	/*---------------------------- This is the mbswath main code ----------------------------*/
+	/*---------------------------- This is the mbinfo main code ----------------------------*/
 
 	if (GMT_Init_IO (API, GMT_IS_DATASET, GMT_IS_NONE, GMT_IN, GMT_ADD_DEFAULT, 0, options) != GMT_NOERROR) {
 		Return (API->error);	/* Establishes data files or stdin */

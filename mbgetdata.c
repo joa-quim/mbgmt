@@ -39,7 +39,7 @@ EXTERN_MSC int GMT_mbgetdata(void *API, int mode, void *args);
 #include "mb_process.h"
 
 /* global structure definitions */
-GMT_LOCAL struct ping_local {
+static struct ping_local {
 	int	pings, kind;
 	int	time_i[7];
 	double	time_d, navlon, navlat, speed, heading, distance, altitude, sonardepth;
@@ -56,7 +56,7 @@ GMT_LOCAL struct ping_local {
 };
 
 /* Control structure for mbgetdata */
-GMT_LOCAL struct MBGETDATA_CTRL {
+static struct MBGETDATA_CTRL {
 	double  bounds[4];
 	int     format;
 	double	btime_d;
@@ -135,7 +135,7 @@ GMT_LOCAL struct MBGETDATA_CTRL {
 	} Z;
 };
 
-GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBGETDATA_CTRL *Ctrl;
 	int     status;
 	int     verbose = 0;
@@ -168,7 +168,7 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->I.file) free (Ctrl->I.file);
 	if (Ctrl->M.file) free (Ctrl->M.file);
@@ -177,7 +177,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> %s [-A[value]] [%s]\n", GMT_J_OPT, GMT_B_OPT);
@@ -210,7 +210,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.

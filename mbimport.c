@@ -68,10 +68,10 @@ EXTERN_MSC int GMT_mbimport(void *API, int mode, void *args);
 
 /* global structure definitions */
 #define MAXPINGS 50
-GMT_LOCAL struct footprint {
+static struct footprint {
 	double	x[4], y[4];
 };
-GMT_LOCAL struct ping_local {
+static struct ping_local {
 	int	pings;
 	int	kind;
 	int	time_i[7];
@@ -105,7 +105,7 @@ GMT_LOCAL struct ping_local {
 	struct  footprint *ssfoot;
 	double *bathshade;
 };
-GMT_LOCAL struct swath_local {
+static struct swath_local {
 	int	npings;
 	int	beams_bath;
 	int	beams_amp;
@@ -114,7 +114,7 @@ GMT_LOCAL struct swath_local {
 };
 
 /* Control structure for mbswath */
-GMT_LOCAL struct CTRL {
+static struct CTRL {
 		/* mbswath variables */
 	double  bounds[4];
 	int     image_type;
@@ -238,7 +238,7 @@ GMT_LOCAL int mbimport_plot_box(struct CTRL *Ctrl, double *x, double *y, double 
 GMT_LOCAL int mbimport_plot_point(struct CTRL *Ctrl, double x, double y, double *rgb, int *error);
 GMT_LOCAL int mbimport_ping_copy(int one, int two, struct swath_local *swath, int *error);
 
-GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  CTRL *Ctrl;
 	int     status;
 	int     verbose = 0;
@@ -285,7 +285,7 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->C.cptfile) free (Ctrl->C.cptfile);
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
@@ -293,7 +293,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Dealloca
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbimport -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
@@ -329,7 +329,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.

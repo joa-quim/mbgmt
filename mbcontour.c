@@ -185,7 +185,7 @@ static char svn_id[] = "$Id: mbcontour.c 2298 2017-04-10 07:57:48Z caress $";
 
 /*--------------------------------------------------------------------*/
 
-void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct MBCONTOUR_CTRL *Ctrl;
         int     status;
         int     verbose = 0;
@@ -242,14 +242,14 @@ void *New_mbcontour_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-void Free_mbcontour_Ctrl (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_mbcontour_Ctrl (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->C.contourfile) free (Ctrl->C.contourfile);
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
 	gmt_M_free (GMT, Ctrl);
 }
 
-int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
+static int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 {
 //	char help_message[] =  "mbcontour is a GMT compatible utility which creates a color postscript \nimage of swath bathymetry or backscatter data.  The image \nmay be shaded relief as well.  Complete maps are made by using \nMBCONTOUR in conjunction with the usual GMT programs.";
 //	char usage_message[] = "mbcontour -Ccptfile -Jparameters -Rwest/east/south/north \n\t[-Afactor -Btickinfo -byr/mon/day/hour/min/sec \n\t-ccopies -Dmode/ampscale/ampmin/ampmax \n\t-Eyr/mon/day/hour/min/sec -fformat \n\t-Fred/green/blue -Gmagnitude/azimuth -Idatalist \n\t-K -Ncptfile -O -P -ppings -Qdpi -Ttimegap -U -W -Xx-shift -Yy-shift \n\t-Zmode[F] -V -H]";
@@ -289,8 +289,7 @@ int GMT_mbcontour_usage (struct GMTAPI_CTRL *API, int level)
 	return (EXIT_FAILURE);
 }
 
-int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options)
-{
+static int GMT_mbcontour_parse (struct GMT_CTRL *GMT, struct MBCONTOUR_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbcontour and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.

@@ -57,7 +57,7 @@ EXTERN_MSC int GMT_mbset(void *API, int mode, void *args);
 static char rcs_id[] = "$Id: mbset.c 2298 2017-04-10 07:57:48Z caress $";
 
 /* Control structure for mbgetdata */
-GMT_LOCAL struct MBSET_CTRL {
+static struct MBSET_CTRL {
 	int     read_datalist;
 	void	*datalist;
 
@@ -85,7 +85,7 @@ GMT_LOCAL struct MBSET_CTRL {
 	} P;
 };
 
-GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  MBSET_CTRL *Ctrl;
 	int     verbose = 0;
 
@@ -102,7 +102,7 @@ GMT_LOCAL void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a n
 	return (Ctrl);
 }
 
-GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->I.file) free (Ctrl->I.file);
 	free(Ctrl->P.pargv[0]);
@@ -110,7 +110,7 @@ GMT_LOCAL void Free_Ctrl (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl) {	/* De
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message(API, GMT_TIME_NONE, "usage: mbset -Iinfile -PPARAMETER:value [-E -L -N -V]\n");
@@ -121,7 +121,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBSET_CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.

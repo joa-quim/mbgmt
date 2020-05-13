@@ -116,7 +116,7 @@ struct bad_struct {
 EXTERN_MSC int GMT_mbclean_j(void *API, int mode, void *args);
 
 /* Control structure for mbcontour */
-struct MBCLEAN_CTRL {
+static struct MBCLEAN_CTRL {
 
 	struct mbcln_A {	/* -A */
 		bool   active;
@@ -246,7 +246,7 @@ static char rcs_id[] = "$Id: mbclean.c 2238 2015-04-15 06:00:52Z caress $";
 #include "cubgcv.c"
 
 /*-----------------------------------------------------------------------------------------*/
-void *New_mbclean_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_mbclean_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct MBCLEAN_CTRL *Ctrl;
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBCLEAN_CTRL);
@@ -257,14 +257,14 @@ void *New_mbclean_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new
 	return (Ctrl);
 }
 
-void Free_mbclean_Ctrl (struct GMT_CTRL *GMT, struct MBCLEAN_CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_mbclean_Ctrl (struct GMT_CTRL *GMT, struct MBCLEAN_CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
 	gmt_M_free (GMT, Ctrl);
 }
 
-GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
+static int usage (struct GMTAPI_CTRL *API, int level) {
 
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
@@ -281,7 +281,7 @@ GMT_LOCAL int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBCLEAN_CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse (struct GMT_CTRL *GMT, struct MBCLEAN_CTRL *Ctrl, struct GMT_OPTION *options) {
 
 	unsigned int n_errors = 0, n_files = 0;
 	char  *pch;
