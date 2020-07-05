@@ -53,6 +53,8 @@
  * which was in turn based on the original program mbclean (v. 1.0)
  * by David Caress.
  *
+ * GMTfied by	J. Luis
+ *
  */
 
 #define THIS_MODULE_CLASSIC_NAME	"mbclean"
@@ -63,7 +65,7 @@
 #define THIS_MODULE_NEEDS	""
 #define THIS_MODULE_OPTIONS "->V"
 
-/* GMT5 header file */
+/* GMT header file */
 #include "gmt_dev.h"
 
 #define GMT_PROG_OPTIONS "->V"

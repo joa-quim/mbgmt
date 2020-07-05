@@ -28,7 +28,8 @@
 set (SUPPL_NAME mbgmt)
 set (SUPPL_LIB_NAME mbgmt)
 set (SUPPL_PROGS_SRCS mbcontour.c mbswath.c mbgrdtiff.c mbclean_j.c mbgrid_j.c mbimport.c
-	mbgetdata.c mbflags.c mbset.c mbinfo.c mbareaclean.c gmtmbgrid.c mbprocess.c mbsvplist.c)
+	mbgetdata.c mbflags.c mbset.c mbinfo.c mbareaclean.c gmtmbgrid.c mbprocess.c 
+	mbsvplist.c mbgrd2obj.c mblevitus.c)
 set (SUPPL_LIB_SRCS ${SUPPL_PROGS_SRCS})
 set (SUPPL_EXTRA_INCLUDES ${ONCRPCINC} ${GETOPTINC} ${PROJINCDIR} ${MBINC} ${PTHREADINC})
 set (SUPPL_EXTRA_LIBS ${PROJLIB} ${ONCRPCLIB} ${GETOPTLIB} ${PTHREADLIB} ${MBIOLIB} ${MBAUXLIB})

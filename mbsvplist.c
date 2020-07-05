@@ -29,6 +29,10 @@
  *
  * Author:	D. W. Caress
  * Date:	January 3,  2001
+ *
+ * GMTfied by	J. Luis. This version can be called by Matlab and Julia
+ * Date:	May, 2020
+ *
  */
 
 #define THIS_MODULE_CLASSIC_NAME "mbsvplist"
@@ -37,19 +41,39 @@
 #define THIS_MODULE_PURPOSE "Lists all water sound velocity profiles (SVPs) within swath data files."
 #define THIS_MODULE_KEYS	"<D{,>D}"
 #define THIS_MODULE_NEEDS ""
-#define THIS_MODULE_OPTIONS "-:>RVhi"
+#define THIS_MODULE_OPTIONS "-:>RVho"
+
+// include gmt_def.h but first undefine PACKAGE variables to prevent
+// warnings about name collision between GDAL's cpl_port.h and mb_config.h
+#ifdef PACKAGE_BUGREPORT
+#undef PACKAGE_BUGREPORT
+#endif
+#ifdef PACKAGE_NAME
+#undef PACKAGE_NAME
+#endif
+#ifdef PACKAGE_STRING
+#undef PACKAGE_STRING
+#endif
+#ifdef PACKAGE_TARNAME
+#undef PACKAGE_TARNAME
+#endif
+#ifdef PACKAGE_URL
+#undef PACKAGE_URL
+#endif
+#ifdef PACKAGE_VERSION
+#undef PACKAGE_VERSION
+#endif
 
 /* GMT header file */
 #include "gmt_dev.h"
-
-EXTERN_MSC int GMT_mbsvplist(void *API, int mode, void *args);
-
 
 /* MBIO include files */
 #include "mb_status.h"
 #include "mb_format.h"
 #include "mb_define.h"
 #include "mb_process.h"
+
+EXTERN_MSC int GMT_mbsvplist(void *API, int mode, void *args);
 
 #define MBSVPLIST_SVP_NUM_ALLOC 24;
 typedef enum {
@@ -90,7 +114,6 @@ static struct MBSVPLIST_CTRL {
 		printmode_t	svp_printmode;
 		int format;
 		int min_num_pairs;
-		int verbose;
 		char *read_file;
 		char *out_file;
 	} X;
@@ -114,7 +137,26 @@ static void Free_Ctrl(struct GMT_CTRL *GMT, struct MBSVPLIST_CTRL *Ctrl) {	/* De
 static int usage(struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "usage: mbinfo -I<inputfile>\n");
+	GMT_Message (API, GMT_TIME_NONE, "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z\n");
+
+	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
+
+	GMT_Message (API, GMT_TIME_NONE, "\n\tOPTIONS:\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-C Output the number of unique SVPs in each file to the shell.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-D Output duplicate SVPs. This is equivalent to -M2\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-F Sets the format for the input swath sonar data using MBIO integer format identifiers\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-H print out a description of its operation and then exit immediately.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-I Sets the input filename.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-M Sets the SVP output mode.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-O Write the SVPs to individual files with names FILE_XXX.svp\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-N<n_pairs> Output only svps that have at least min_num_pairs svp values.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-P Sets the first SVP output for each swathfile to be used for recalculating\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   the bathymetry in that swathfile by mbprocess. Implyies -O\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-R When the -S option has been specified, this option sets the limits\n\t   within which SSV values will be output.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-S output the sound velocity values used for beamforming by the sonar\n\t   (often called surface sound velocity, or SSV) instead of SVP profiles.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-T Output table of svp#, time, longitude, latitude and number of points for SVPs.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-Z Replace the first depth value with zero before outputting the SVP.\n");
+	GMT_Option (API, "V,:,o");
 
 	return (EXIT_FAILURE);
 }
@@ -217,10 +259,6 @@ static int parse (struct GMT_CTRL *GMT, struct MBSVPLIST_CTRL *Ctrl, struct GMT_
 
 			case 'Z':	/*  */
 				Ctrl->X.svp_force_zero = true;
-				break;
-
-			case 'V':	/*  Verbose */
-				Ctrl->X.verbose++;
 				break;
 
 			default:	/* Report bad options */
@@ -395,7 +433,11 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 
 	/* Parse the command-line arguments */
 
+#if GMT_MAJOR_VERSION >= 6
 	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+#else
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
+#endif
 	if (GMT_Parse_Common(API, THIS_MODULE_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBSVPLIST_CTRL *)New_Ctrl(GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse(GMT, Ctrl, options))) {
@@ -404,6 +446,12 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 		Return(MB_ERROR_BAD_USAGE);
 	}
 	/*---------------------------- This is the mbsvplist main code ----------------------------*/
+
+	/* Try to combine the MB & GMT verbose systems and make it also compatible with GMT < 6.1 */
+	if (GMT->current.setting.verbose > 3)
+		verbose = 1;
+	if (GMT->current.setting.verbose == GMT_MSG_DEBUG)
+		verbose = 2;
 
 	if (verbose == 1 || Ctrl->X.help) {
 		GMT_Message (API, GMT_TIME_NONE, "Program %s\n", program_name);
@@ -426,7 +474,6 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 	svp_printmode = Ctrl->X.svp_printmode;
 	format = Ctrl->X.format;
 	min_num_pairs = Ctrl->X.min_num_pairs;
-	verbose = Ctrl->X.verbose;
 
 	if (GMT->common.R.active[RSET]) {
 		ssv_bounds[0] = GMT->common.R.wesn[XLO];	ssv_bounds[1] = GMT->common.R.wesn[XHI];
@@ -482,7 +529,6 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 
 	/* open file list */
 	if (read_datalist) {
-		char *pch;
 		const int look_processed = MB_DATALIST_LOOK_UNSET;
 		if (mb_datalist_open(verbose, &datalist, read_file, look_processed, &error) != MB_SUCCESS) {
 			GMT_Report (API, GMT_MSG_NORMAL, "Unable to open data list file: %s\n", read_file);
@@ -490,15 +536,6 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 			Return(MB_ERROR_OPEN_FAIL);
 		}
 		read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
-#ifdef _WIN32
-		pch = strchr(file, ':');
-		if (error && pch && (pch - file) > 1) {
-			int k, off = pch - file;
-			for (k = 0; k < strlen(file) - off + 1; k++)
-				file[k] = file[k+off-1];
-			file[k] = '\0';
-		}
-#endif
 	}
 	else {		/* else copy single filename to be read */
 		strcpy(file, read_file);

@@ -1,5 +1,5 @@
 # List of extra  files to include in the installer
-SET (PATO_MB  "C:/progs_cygw/MB-System/compileds/${VC}_${BITAGE}")
+SET (PATO_MB  "C:/progs_cygw/MB-Qt/compileds/${VC}_${BITAGE}")
 SET (PATO_BIN "${PATO_MB}/bin")
 SET (PATO_LIB "${PATO_MB}/bin")
 SET (PATO_GDAL_BIN  "C:/programs/compa_libs/gdal_GIT/compileds/${VC}_${BITAGE}/bin")
@@ -29,7 +29,6 @@ install (PROGRAMS
 	${PATO_BIN}/mbauvnavusbl.exe
 	${PATO_BIN}/mbbackangle.exe
 	${PATO_BIN}/mbclean.exe
-	${PATO_BIN}/mbclean_j.exe
 	${PATO_BIN}/mbcopy.exe
 	${PATO_BIN}/mbctdlist.exe
 	${PATO_BIN}/mbdatalist.exe
@@ -55,7 +54,6 @@ install (PROGRAMS
 	${PATO_BIN}/mbmosaic.exe
 	${PATO_BIN}/mbnavadjust.exe
 	${PATO_BIN}/mbnavadjustmerge.exe
-	${PATO_BIN}/mbnavadjusttest.exe
 	${PATO_BIN}/mbnavedit.exe
 	${PATO_BIN}/mbnavlist.exe
 	${PATO_BIN}/mbneptune2esf.exe
@@ -142,7 +140,6 @@ install (DIRECTORY ${PATO_MB}/share/mbsystem/
 
 install (PROGRAMS 
 	${PATO_MB}/share/mbsystem/LevitusAnnual82.dat
-	${PATO_MB}/share/mbsystem/Projections.dat
 	DESTINATION ${GMT_DATADIR}/mbsystem
 	COMPONENT MB)
 
