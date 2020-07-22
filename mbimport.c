@@ -552,14 +552,15 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 	struct GMT_IMAGE *I = NULL;
 
 	/* MBIO status variables */
-	bool   plot = false, done = false, flush = false, read_data = false;
-	int    status = MB_SUCCESS;
-	int    verbose = 0;
-	int    error = MB_ERROR_NO_ERROR;
-	char  *message = NULL;
+	bool    plot = false, done = false, flush = false, read_data = false;
+	int     status = MB_SUCCESS;
+	int     verbose = 0;
+	int     error = MB_ERROR_NO_ERROR;
+	char   *message = NULL;
 
-	char	file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""};
-	int     format, file_in_bounds, nping_read = 0;
+	bool    file_in_bounds = false;
+	char    file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""};
+	int     format, nping_read = 0;
 	int     start, first, nplot, save_new, i, pings;
 	int    *npings = NULL;
 	double  amplog;
