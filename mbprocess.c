@@ -368,7 +368,6 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 	int read_datalist = MB_NO;
 	int read_data = MB_NO;
 	char read_file[MB_PATH_MAXLINE];
-	void *datalist;
 	int look_processed = MB_DATALIST_LOOK_NO;
 	double file_weight;
 	int proceedprocess = MB_NO;
@@ -848,8 +847,9 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 							locked = MB_NO;
 						}
 						else if (lock_error == MB_ERROR_FILE_LOCKED) {
+							bool _locked = (bool)locked;
 							proceedprocess = MB_NO;
-							lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program,
+							lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &_locked, &lock_purpose, lock_program,
 							                             lock_user, lock_cpu, lock_date, &lock_error);
 						}
 						else if (lock_error == MB_ERROR_OPEN_FAIL) {
@@ -860,7 +860,8 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 
 					/* want to process, but lock files are disabled */
 					else {
-						lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+						bool _locked = (bool)locked;
+						lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &_locked, &lock_purpose, lock_program, lock_user,
 						                             lock_cpu, lock_date, &lock_error);
 						proceedprocess = MB_YES;
 					}
@@ -868,8 +869,9 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 
 				/* else only testing */
 				else {
+					bool _locked = (bool)locked;
 					/* want to process, check lock status of the file to be processed */
-					lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+					lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &_locked, &lock_purpose, lock_program, lock_user,
 					                             lock_cpu, lock_date, &lock_error);
 					if (locked == MB_NO || uselockfiles == MB_NO) {
 						proceedprocess = MB_YES;
@@ -880,8 +882,9 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 				}
 			}
 			else {
+				bool _locked = (bool)locked;
 				proceedprocess = MB_NO;
-				lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &locked, &lock_purpose, lock_program, lock_user,
+				lock_status = mb_pr_lockinfo(verbose, process.mbp_ifile, &_locked, &lock_purpose, lock_program, lock_user,
 				                             lock_cpu, lock_date, &lock_error);
 			}
 
@@ -5132,7 +5135,7 @@ int GMT_mbprocess (void *V_API, int mode, void *args) {
 						status = mbsys_simrad3_makess(verbose, imbio_ptr, store_ptr, pixel_size_set, &pixel_size, swath_width_set,
 						                              &swath_width, pixel_int, &error);
 					else if (process.mbp_format == MBF_RESON7KR)
-						status = mbsys_reson7k_makess(verbose, imbio_ptr, store_ptr, R7KRECID_7kV2SnippetData, pixel_size_set,
+						status = mbsys_reson7k_makess(verbose, imbio_ptr, store_ptr, pixel_size_set,
 						                              &pixel_size, swath_width_set, &swath_width, pixel_int, &error);
 					status = mb_extract(verbose, imbio_ptr, store_ptr, &kind, time_i, &time_d, &navlon, &navlat, &speed, &heading,
 					                    &nbath, &namp, &nss, beamflag, bath, amp, bathacrosstrack, bathalongtrack, ss,

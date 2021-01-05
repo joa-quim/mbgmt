@@ -812,8 +812,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	while (read_data == MB_YES)
 	    {
 	    /* check for mbinfo file - get file bounds if possible */
-	    status = mb_check_info(verbose, file, Ctrl->L.lonflip, Ctrl->bounds,
-			    &file_in_bounds, &error);
+	    status = mb_check_info(verbose, file, Ctrl->L.lonflip, Ctrl->bounds, &file_in_bounds, &error);
 	    if (status == MB_FAILURE)
 		    {
 		    file_in_bounds = MB_YES;

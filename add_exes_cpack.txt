@@ -156,9 +156,3 @@ install (PROGRAMS
 install (DIRECTORY ${PATO_MB}/share/mbsystem/
 	DESTINATION ${GMT_DATADIR}/mbsystem
 	COMPONENT MB)
-
-install (PROGRAMS 
-	${PATO_MB}/share/mbsystem/LevitusAnnual82.dat
-	DESTINATION ${GMT_DATADIR}/mbsystem
-	COMPONENT MB)
-

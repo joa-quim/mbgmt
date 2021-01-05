@@ -645,7 +645,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file */
 	if (Ctrl->C.active) {
-		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL)
+		if ((CPTcolor = gmt_get_palette(GMT, Ctrl->C.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL)
 			Return (API->error);
 		if (CPTcolor->is_gray && Ctrl->image_type == MBSWATH_IMAGE_24)
 			Ctrl->image_type = MBSWATH_IMAGE_8;
@@ -665,7 +665,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 			Ctrl->image_type = MBSWATH_IMAGE_8;
 		}
 
-		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0.0, 0)) == NULL)	/* Dedaults to rainbow (others are harder) */
+		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0.0)) == NULL)	/* Dedaults to rainbow (others are harder) */
 			Return (API->error);
 		gmt_scale_cpt (GMT, CPTcolor, -1);		/* Flip the color scale because Z is pos down (Blheak) */
 		CPTcolor->data->z_low = zmin;
@@ -677,7 +677,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 
 	/* Read the color palette file for amplitude shading if requested */
 	if (Ctrl->N.active) {
-		if ((CPTshade = gmt_get_palette (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0, 0)) == NULL)
+		if ((CPTshade = gmt_get_palette (GMT, Ctrl->N.cptfile, GMT_CPT_REQUIRED, 0.0, 0.0, 0.0)) == NULL)
 			Return (API->error);
 	}
 
