@@ -273,7 +273,7 @@ int printsimplevalue(int verbose, double value, int width, int precision, bool a
 #define Return(code) {Free_Ctrl (GMT, Ctrl); gmt_end_module (GMT, GMT_cpy); bailout (code);}
 
 /*--------------------------------------------------------------------*/
-int GMT_mbsvplist(void *V_API, int mode, void *args) {
+int GMT_mbnavlist(void *V_API, int mode, void *args) {
 
 	static const char program_name[] = "mbnavlist";
 	static const char help_message[] =
@@ -321,8 +321,7 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 		bool errflg = false;
 		bool help = false;
 		int c;
-		while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1)
-		{
+		while ((c = getopt(argc, argv, "AaB:b:D:d:E:e:F:f:G:g:I:i:J:j:K:k:L:l:N:n:O:o:R:r:S:s:T:t:Z:z:VvHh")) != -1) {
 			switch (c) {
 			case 'H':
 			case 'h':
@@ -1108,12 +1107,10 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 		status &= mb_close(verbose, &mbio_ptr, &error);
 
 		/* figure out whether and what to read next */
-		if (read_datalist) {
+		if (read_datalist)
 			read_data = mb_datalist_read(verbose, datalist, file, dfile, &format, &file_weight, &error) == MB_SUCCESS;
-		}
-		else {
+		else
 			read_data = false;
-		}
 
 		/* end loop over files in list */
 	}
