@@ -24,17 +24,15 @@
 #define THIS_MODULE_MODERN_NAME	"mbimport"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
-#define THIS_MODULE_KEYS	"<D{,CC(,MI}"
+#define THIS_MODULE_KEYS	"<D{,CC(,NC(,MI}"
 #define THIS_MODULE_NEEDS	""
-#define THIS_MODULE_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
+#define THIS_MODULE_OPTIONS "->JRUVXYnt" GMT_OPT("S")
 
 /* GMT5 header file */
 #include "gmt_dev.h"
 
 
 EXTERN_MSC int GMT_mbimport(void *API, int mode, void *args);
-
-#define GMT_PROG_OPTIONS "->BJKOPRUVXY" GMT_OPT("S")
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -206,7 +204,7 @@ static struct CTRL {
 		bool active;
 		char *cptfile;
 	} N;
-	struct mswath_p {	/* -p<pings> */
+	struct mbimport_p {	/* -p<pings> */
 		bool active;
 		int pings;
 	} p;
@@ -296,7 +294,7 @@ static void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate 
 static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "usage: mbimport -I<inputfile> %s [%s]\n", GMT_J_OPT, GMT_B_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "usage: mbimport -I<inputfile> %s\n", GMT_J_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-b<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-C<cptfile>] [-D<mode>/<ampscale>/<ampmin>/<ampmax>] [-Ei|<dpi>]\n");
@@ -305,23 +303,20 @@ static int usage (struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
-	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
-									 GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s]\n\t[%s]\n [%s]\n\n", 
+									 GMT_X_OPT, GMT_Y_OPT, GMT_n_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
 	GMT_Message (API, GMT_TIME_NONE, "\t<inputfile> is an MB-System datalist referencing the swath data to be plotted.\n");
 	GMT_Option (API, "J-");
 	GMT_Message (API, GMT_TIME_NONE, "\n\tOPTIONS:\n");
-	GMT_Option (API, "B-");
 	GMT_Message (API, GMT_TIME_NONE, "\t-C Color palette file to convert z to rgb.  Optionally, instead give name of a master cpt\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t   to automatically assign 16 continuous colors over the data range [rainbow].\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t   to automatically assign 16 continuous colors over the data range [turbo].\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t-E Set dpi for the projected output Postscript image\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   if -Jx or -Jm is not selected.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   Give i to do the interpolation in PostScript at device resolution.\n");
 	gmt_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
-	GMT_Option (API, "K");
-	GMT_Option (API, "O,P");
 	GMT_Message (API, GMT_TIME_NONE, "\t-p<pings> Sets the ping averaging of the input data [Default = 1, i.e. no ping average].\n");
 	GMT_Option (API, "R");
 	GMT_Option (API, "U,V,X,c,.");
@@ -422,7 +417,6 @@ static int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *op
 					n_errors++;
 				}
 				break;
-			case 'f':	/* format */
 			case 'F':	/* format */
 				n = sscanf(opt->arg, "%d", &(Ctrl->F.format));
 				if (n == 1)
@@ -584,7 +578,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 #else
 	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
-	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
+	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
 
@@ -651,10 +645,10 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 			Ctrl->image_type = MBSWATH_IMAGE_8;
 	}
 	else if (Ctrl->Rfake.active) {
-		char   file[8] = {""};	/* If used as is, it will mean 'rainbow' to gmt_get_cpt() -- NOT USED!!!! -- */
+		char   file[8] = {""};	/* If used as is, it will mean 'turbo' to gmt_get_cpt() -- NOT USED!!!! -- */
 		double zmin, zmax;
 		if (Ctrl->Z.mode <= MBSWATH_BATH_AMP) {		/* Cases 1, 2 and 3. They plot the bathymetry. */
-			zmin = mb_info.depth_min;	zmax = mb_info.depth_max;	strcat(file, "rainbow");
+			zmin = mb_info.depth_min;	zmax = mb_info.depth_max;	strcat(file, "turbo");
 		}
 		else if (Ctrl->Z.mode == MBSWATH_AMP) { 	/* Case 4 */
 			zmin = mb_info.amp_min;		zmax = mb_info.amp_max;		strcat(file, "gray");
@@ -665,7 +659,7 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 			Ctrl->image_type = MBSWATH_IMAGE_8;
 		}
 
-		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0.0)) == NULL)	/* Dedaults to rainbow (others are harder) */
+		if ((CPTcolor = gmt_get_palette(GMT, file, GMT_CPT_OPTIONAL, zmin, zmax, 0.0)) == NULL)	/* Dedaults to turbo (others are harder) */
 			Return (API->error);
 		gmt_scale_cpt (GMT, CPTcolor, -1);		/* Flip the color scale because Z is pos down (Blheak) */
 		CPTcolor->data->z_low = zmin;

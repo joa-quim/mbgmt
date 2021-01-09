@@ -1,6 +1,5 @@
 /*--------------------------------------------------------------------
- *    The MB-system:	mb_getdata.c
- *    $Id: $
+ *    The MB-system:	mbgetdata.c
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License or GNU Lesser
@@ -8,7 +7,7 @@
  * either version 2 of the Licenses, or (at your option) any later version.
  *--------------------------------------------------------------------*/
 /*
- * MB_GETDATA is a GMT supplement module utility which 
+ * MBGETDATA is a GMT supplement module utility which 
  *
  * Author:	J. Luis but based on other MB codes
  * Date:	27 April, 2017
@@ -21,14 +20,12 @@
 #define THIS_MODULE_PURPOSE	"Get swath bathymetry, amplitude, or backscatter data"
 #define THIS_MODULE_KEYS	"<D{,ND),MD}"
 #define THIS_MODULE_NEEDS	""
-#define THIS_MODULE_OPTIONS "->BJRUV" GMT_OPT("S")
+#define THIS_MODULE_OPTIONS "->JRV" GMT_OPT("S")
 
 /* GMT5 header file */
 #include "gmt_dev.h"
 
 EXTERN_MSC int GMT_mbgetdata(void *API, int mode, void *args);
-
-#define GMT_PROG_OPTIONS "->BJRUV" GMT_OPT("S")
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -180,32 +177,24 @@ static void Free_Ctrl (struct GMT_CTRL *GMT, struct MBGETDATA_CTRL *Ctrl) {	/* D
 static int usage (struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> %s [-A[value]] [%s]\n", GMT_J_OPT, GMT_B_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "usage: mbgetdata -I<inputfile> [-A[value]]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-b<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-e<year>/<month>/<day>/<hour>/<minute>/<second>]\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t[-C[a]] [-D<mode>/<ampscale>/<ampmin>/<ampmax>]\n");
-	GMT_Message (API, GMT_TIME_NONE, "\t[-F<format>] [-G<magnitude>/<azimuth | median>]\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t[-C[a]] [-D<mode>/<ampscale>/<ampmin>/<ampmax>] [-F<format>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<index_file>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s]\n", GMT_Rgeo_OPT, GMT_V_OPT);
-	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s] [%s]\n\t[%s]\n\t[%s] [%s]\n\n", 
-									 GMT_X_OPT, GMT_Y_OPT, GMT_f_OPT, GMT_n_OPT, GMT_p_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
 	GMT_Message (API, GMT_TIME_NONE, "\t<inputfile> is an MB-System datalist referencing the swath data to be plotted.\n");
-	GMT_Option (API, "J-");
 	GMT_Message (API, GMT_TIME_NONE, "\n\tOPTIONS:\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t-A Replace flagged beans with NaN. Use -A<val> to assign a constant value to the\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   flagged beans. Use negative <val> to also search for flagged beans in .esf files.\n");
-	GMT_Option (API, "B-");
 	GMT_Message (API, GMT_TIME_NONE, "\t-C Output SideScan, or amplitude if -Ca, instead of bathymetry. This case ignores -A\n");
-	gmt_rgb_syntax (API->GMT, 'G', "Set transparency color for images that otherwise would result in 1-bit images.\n\t  ");
-	GMT_Option (API, "K");
-	GMT_Option (API, "O,P");
 	GMT_Message (API, GMT_TIME_NONE, "\t-p<pings> Sets the ping averaging of the input data [Default = 1, i.e. no ping average].\n");
 	GMT_Option (API, "R");
-	GMT_Option (API, "U,V,X,c,.");
+	GMT_Option (API, "U,V,.");
 
 	return (EXIT_FAILURE);
 }
@@ -399,7 +388,8 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 	char  *message = NULL;
 
 	char   file[MB_PATH_MAXLINE] = {""}, dfile[MB_PATH_MAXLINE] = {""}, esffile[MB_PATH_MAXLINE] = {""};
-	int    format, file_in_bounds, pings, n_pings, n_beams, n_beams_max = 0, col;
+	int    format, pings, n_pings, n_beams, n_beams_max = 0, col;
+	bool   file_in_bounds = false;
 	int   *index;
 	struct mb_info_struct mb_info;
 	struct mb_esf_struct esf;
@@ -421,7 +411,7 @@ int GMT_mbgetdata (void *V_API, int mode, void *args) {
 #else
 	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
-	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
+	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);
 	Ctrl = (struct MBGETDATA_CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
 
