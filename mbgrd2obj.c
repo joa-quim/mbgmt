@@ -216,14 +216,11 @@ GMT_LOCAL int parse (struct GMT_CTRL *GMT, struct MBGRD2OBJ_CTRL *Ctrl, struct G
 
 int GMT_mbgrd2obj (void *V_API, int mode, void *args) {
 	bool first = true;
-	unsigned int row, col, n_output, w_col = 3;
+	unsigned int row, col, w_col = 3;
 	int error = 0, write_error = 0;
 
 	uint64_t ij;
-
-	char header[GMT_BUFSIZ];
-
-	double wesn[4], d_value;
+	double wesn[4];
 
 	struct GMT_GRID *G = NULL;
 	struct MBGRD2OBJ_CTRL *Ctrl = NULL;

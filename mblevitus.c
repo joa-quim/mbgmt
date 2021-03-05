@@ -83,7 +83,7 @@ const double MBLEVITUS_NO_DATA = -1000000000.0;
 #define NLEVITUS_MAX 33
 
 // TODO(schwehr): warning: excess elements in array initializer
-const double depth[48 /* NDEPTH_MAX + 2 */] =
+double depth[48 /* NDEPTH_MAX + 2 */] =
 	{0.0, 10.0, 20.0, 30.0, 50.0, 75.0, 100.0, 125.0,
 	 150.0, 200.0, 250.0, 300.0, 400.0, 500.0, 600.0, 700.0,
 	 800.0, 900.0, 1000.0, 1100.0, 1200.0, 1300.0, 1400.0, 1500.0,
@@ -94,6 +94,7 @@ const double depth[48 /* NDEPTH_MAX + 2 */] =
 /*--------------------------------------------------------------------*/
 static struct MBLEVITUS_CTRL {
 	struct mbsvplist_X {	/*  */
+		int  dir;
 		bool help, all4;
 		char *read_file;
 		char *out_file;
@@ -106,6 +107,7 @@ static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new 
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBLEVITUS_CTRL);
 	Ctrl->X.read_file = NULL;
+	Ctrl->X.dir = 1;
 	return (Ctrl);
 }
 
@@ -119,7 +121,7 @@ static void Free_Ctrl(struct GMT_CTRL *GMT, struct MBLEVITUS_CTRL *Ctrl) {	/* De
 static int usage(struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "mblevitus -Llon/lat [<levitus_file>] [-A] [-O[<outfile>]] [-V] [-H]\n");
+	GMT_Message (API, GMT_TIME_NONE, "mblevitus -Llon/lat [<levitus_file>] [-A] [-O[<outfile>]] [-H] [-V] [-z]\n");
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
@@ -133,6 +135,7 @@ static int usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t-H print out a description of its operation and then exit immediately.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t-O Write the SVP to <outfile>. Default (no -O) is to write to standard output.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t   But -O alone will write to outfile = \"velocity\".\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-z Make z positive up (original MB has it positive down).\n");
 	GMT_Option (API, "V,:,o");
 
 	return (EXIT_FAILURE);
@@ -195,6 +198,10 @@ static int parse (struct GMT_CTRL *GMT, struct MBLEVITUS_CTRL *Ctrl, struct GMT_
 					Ctrl->X.out_file = strdup ("velocity");	/* Only to try to maintain backward compatibily */
 				break;
 
+			case 'z':	/*  Z positive up */
+				Ctrl->X.dir = -1;
+				break;
+
 			default:	/* Report bad options */
 				n_errors += gmt_default_error (GMT, opt->option);
 				break;
@@ -242,9 +249,9 @@ int GMT_mblevitus(void *V_API, int mode, void *args) {
 	struct MBLEVITUS_CTRL *Ctrl = NULL;
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
-	if (API == NULL) return (GMT_NOT_A_SESSION);
-	if (mode == GMT_MODULE_PURPOSE) return (usage(API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
-	options = GMT_Create_Options (API, mode, args);	if (API->error) return (API->error);	/* Set or get option list */
+	if (API == NULL) Return (GMT_NOT_A_SESSION);
+	if (mode == GMT_MODULE_PURPOSE) Return (usage(API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
+	options = GMT_Create_Options (API, mode, args);	if (API->error) Return (API->error);	/* Set or get option list */
 
 	if (!options || options->option == GMT_OPT_USAGE) bailout(usage (API, GMT_USAGE));	/* Return the usage message */
 	if (options->option == GMT_OPT_SYNOPSIS) bailout(usage (API, GMT_SYNOPSIS));	/* Return the synopsis */
@@ -445,7 +452,7 @@ int GMT_mblevitus(void *V_API, int mode, void *args) {
 	if ((D = GMT_Create_Data (API, GMT_IS_DATASET, GMT_IS_LINE, 0, dim, NULL, NULL, 0, 0, NULL)) == NULL)
 		Return (API->error);			/* An empty dataset */
 
-	snprintf(header, GMT_BUFSIZ, "Sound velocity profile created by %s MB-System Version %s\n", program_name, MB_VERSION);
+	snprintf(header, GMT_BUFSIZ * 2, "Sound velocity profile created by %s MB-System Version %s\n", program_name, MB_VERSION);
 #ifndef _WIN32							/* This is so unix (and not really important info) */
 	{
 		const time_t right_now = time((time_t *)0);
@@ -487,6 +494,9 @@ int GMT_mblevitus(void *V_API, int mode, void *args) {
 	S = GMT_Alloc_Segment (API, GMT_NO_STRINGS, nvelocity_tot, dim[3], NULL, NULL);
 	S->header = strdup(header);
 
+	if (Ctrl->X.dir == -1)
+		for (int i = 0; i < NDEPTH_MAX; i++) depth[i] = -depth[i];
+
 	ix = (GMT->current.setting.io_lonlat_toggle[GMT_IN]);	iy = 1 - ix;
 	gmt_M_memcpy (S->data[ix], depth, nvelocity_tot, double);
 	gmt_M_memcpy (S->data[iy], velocity, nvelocity_tot, double);
@@ -514,17 +524,13 @@ int GMT_mblevitus(void *V_API, int mode, void *args) {
 	char sm[2] = {""};
 	sm[0] = GMT->current.setting.io_seg_marker[GMT_OUT];
 	GMT->current.setting.io_seg_marker[GMT_OUT] = '#';
+	if (GMT->current.setting.io_lonlat_toggle[GMT_IN])		/* Also toggles in output */
+		GMT->current.setting.io_lonlat_toggle[GMT_OUT] = false;
+
 	if (GMT_Write_Data (API, GMT_IS_DATASET, GMT_IS_FILE, GMT_IS_LINE, GMT_WRITE_SET, NULL, ofile, D) != GMT_NOERROR)
 		Return (API->error);
 
 	GMT->current.setting.io_seg_marker[GMT_OUT] = sm[0];
-
-	if (verbose >= 2) {
-		fprintf(stderr, "\ndbg2  Program <%s> completed\n", program_name);
-		fprintf(stderr, "dbg2  Ending status:\n");
-		fprintf(stderr, "dbg2       status:  %d\n", status);
-		fprintf(stderr, "dbg2       error:   %d\n", error);
-	}
 
 	Return(error);
 }

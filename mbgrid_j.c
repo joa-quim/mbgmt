@@ -634,7 +634,7 @@ int GMT_mbgrid_j (void *V_API, int mode, void *args) {
 	int	beams_amp;
 	int	pixels_ss;
 	char	file[MB_PATH_MAXLINE];
-	int	file_in_bounds;
+	bool	file_in_bounds = false;
 	void	*mbio_ptr = NULL;
 	struct mb_io_struct *mb_io_ptr = NULL;
 	int     topo_type;
@@ -748,7 +748,7 @@ int GMT_mbgrid_j (void *V_API, int mode, void *args) {
 	float	*sdata = NULL;
 	float	*work1 = NULL;
 	int	*work2 = NULL;
-	int	*work3 = NULL;
+	bool	*work3 = NULL;
 #endif
 	double  bdata_origin_x, bdata_origin_y;
 	float	*output = NULL;

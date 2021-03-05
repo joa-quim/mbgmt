@@ -113,7 +113,7 @@ static struct MBSVPLIST_CTRL {
 		bool output_counts;
 		printmode_t	svp_printmode;
 		int format;
-		int min_num_pairs;
+		int min_num_pairs, dir;
 		char *read_file;
 		char *out_file;
 	} X;
@@ -124,6 +124,7 @@ static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new 
 
 	Ctrl = gmt_M_memory (GMT, NULL, 1, struct MBSVPLIST_CTRL);
 	Ctrl->X.read_file = NULL;
+	Ctrl->X.dir = 1;
 	return (Ctrl);
 }
 
@@ -137,7 +138,7 @@ static void Free_Ctrl(struct GMT_CTRL *GMT, struct MBSVPLIST_CTRL *Ctrl) {	/* De
 static int usage(struct GMTAPI_CTRL *API, int level) {
 	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
-	GMT_Message (API, GMT_TIME_NONE, "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z\n");
+	GMT_Message (API, GMT_TIME_NONE, "mbsvplist [-C -D -Fformat -H -Ifile -Mmode -O -Nmin_num_pairs -P -T -V -Z -z]\n");
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
@@ -156,6 +157,7 @@ static int usage(struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t-S output the sound velocity values used for beamforming by the sonar\n\t   (often called surface sound velocity, or SSV) instead of SVP profiles.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t-T Output table of svp#, time, longitude, latitude and number of points for SVPs.\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t-Z Replace the first depth value with zero before outputting the SVP.\n");
+	GMT_Message (API, GMT_TIME_NONE, "\t-z Make z positive up (original MB has it positive down).\n");
 	GMT_Option (API, "V,:,o");
 
 	return (EXIT_FAILURE);
@@ -259,6 +261,10 @@ static int parse (struct GMT_CTRL *GMT, struct MBSVPLIST_CTRL *Ctrl, struct GMT_
 
 			case 'Z':	/*  */
 				Ctrl->X.svp_force_zero = true;
+				break;
+
+			case 'z':	/*  */
+				Ctrl->X.dir = -1;
 				break;
 
 			default:	/* Report bad options */
@@ -424,9 +430,9 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 
 	/*----------------------- Standard module initialization and parsing ----------------------*/
 
-	if (API == NULL) return (GMT_NOT_A_SESSION);
-	if (mode == GMT_MODULE_PURPOSE) return (usage(API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
-	options = GMT_Create_Options (API, mode, args);	if (API->error) return (API->error);	/* Set or get option list */
+	if (API == NULL) Return (GMT_NOT_A_SESSION);
+	if (mode == GMT_MODULE_PURPOSE) Return (usage(API, GMT_MODULE_PURPOSE));	/* Return the purpose of program */
+	options = GMT_Create_Options (API, mode, args);	if (API->error) Return (API->error);	/* Set or get option list */
 
 	if (!options || options->option == GMT_OPT_USAGE) bailout(usage (API, GMT_USAGE));	/* Return the usage message */
 	if (options->option == GMT_OPT_SYNOPSIS) bailout(usage (API, GMT_SYNOPSIS));	/* Return the synopsis */
@@ -558,6 +564,8 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 	}
 
 	ix = (GMT->current.setting.io_lonlat_toggle[GMT_IN]);	iy = 1 - ix;
+	if (GMT->current.setting.io_lonlat_toggle[GMT_IN])		/* Also toggles in output */
+		GMT->current.setting.io_lonlat_toggle[GMT_OUT] = false;
 
 	/* loop over all files to be read */
 	while (read_data) {
@@ -860,6 +868,10 @@ int GMT_mbsvplist(void *V_API, int mode, void *args) {
 						S->header = strdup(header);
 						gmt_M_memcpy (S->data[ix], svp_save[isvp].depth, svp_save[isvp].n, double);
 						gmt_M_memcpy (S->data[iy], svp_save[isvp].velocity, svp_save[isvp].n, double);
+
+						if (Ctrl->X.dir == -1)
+							for (int kk = 0; kk < svp_save[isvp].n; kk++) S->data[ix][kk] = -S->data[ix][kk];
+
 						S->n_rows = svp_save[isvp].n;
 
 						if (n_seg == n_seg_alloc) {

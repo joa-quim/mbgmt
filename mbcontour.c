@@ -537,7 +537,7 @@ int GMT_mbcontour (void *V_API, int mode, void *args)
 	double	timegap;
 	mb_path	file;
 	mb_path	dfile;
-	int	file_in_bounds = MB_NO;
+	bool	file_in_bounds = false;
 	int	beams_bath;
 	int	beams_amp;
 	int	pixels_ss;
@@ -1361,7 +1361,7 @@ int mbcontour_ping_copy(int verbose, int one, int two, struct swath *swath, int 
 		fprintf(stderr,"dbg2       verbose:    %d\n",verbose);
 		fprintf(stderr,"dbg2       one:        %d\n",one);
 		fprintf(stderr,"dbg2       two:        %d\n",two);
-		fprintf(stderr,"dbg2       swath:      %lu\n",(size_t)swath);
+		fprintf(stderr,"dbg2       swath:      %zu\n",(size_t)swath);
 		fprintf(stderr,"dbg2       pings:      %d\n",swath->npings);
                 fprintf(stderr,"dbg2       time_i[two]:%4d  %4d %2d %2d %2d %2d %2d %6.6d\n",
                                                 two,swath->pings[two].time_i[0],

@@ -207,7 +207,7 @@ int GMT_mbflags (void *V_API, int mode, void *args) {
 	/* swath file locking variables */
 	int	uselockfiles;
 	int	lock_status;
-	int	locked;
+	bool	locked;
 	int	lock_purpose;
 	mb_path	lock_program;
 	mb_path lock_cpu;

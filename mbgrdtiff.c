@@ -991,7 +991,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			value_short = GeoAsciiParamsTag;
 			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
-			value_short = strlen(tiff_comment);
+			value_short = (unsigned short)strlen(tiff_comment);
 			mb_put_binary_short(MB_NO, value_short, &tiff_header[keyindex]);
 			keyindex += 2;
 			value_short = 0;
@@ -1039,7 +1039,7 @@ int GMT_mbgrdtiff(void *V_API, int mode, void *args) {
 			index += 4;
 			break;
 		case GeoAsciiParamsTag:
-			value_int = strlen(tiff_comment);
+			value_int = (int)strlen(tiff_comment);
 			mb_put_binary_int(MB_NO, value_int, &tiff_header[index]);
 			index += 4;
 			value_int = tiff_offset[i];

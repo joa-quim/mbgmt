@@ -643,7 +643,7 @@ int GMT_mbswath (void *V_API, int mode, void *args)
 	mb_path file;
 	mb_path dfile;
 	int     format;
-	int     file_in_bounds;
+	bool    file_in_bounds = false;
 	int     read_data;
 	struct ping *pingcur;
 	double  amplog;

@@ -418,7 +418,7 @@ int GMT_mbnavlist(void *V_API, int mode, void *args) {
 		if (errflg) {
 			fprintf(stderr, "usage: %s\n", usage_message);
 			fprintf(stderr, "\nProgram <%s> Terminated\n", program_name);
-			exit(MB_ERROR_BAD_USAGE);
+			Return(MB_ERROR_BAD_USAGE);
 		}
 
 		if (verbose == 1 || help) {
@@ -473,7 +473,7 @@ int GMT_mbnavlist(void *V_API, int mode, void *args) {
 		if (help) {
 			fprintf(stderr, "\n%s\n", help_message);
 			fprintf(stderr, "\nusage: %s\n", usage_message);
-			exit(MB_ERROR_NO_ERROR);
+			Return(MB_ERROR_NO_ERROR);
 		}
 	}
 
