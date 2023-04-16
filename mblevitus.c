@@ -76,7 +76,7 @@
 #include "mb_status.h"
 
 EXTERN_MSC int GMT_mblevitus(void *API, int mode, void *args);
-EXTERN_MSC char *GMT_runtime_bindir_win32 (char *result);
+EXTERN_MSC char *gmt_runtime_bindir_win32 (char *result);
 
 const double MBLEVITUS_NO_DATA = -1000000000.0;
 #define NDEPTH_MAX 46
@@ -314,7 +314,7 @@ int GMT_mblevitus(void *V_API, int mode, void *args) {
 #ifdef _WIN32
 			/* Find the path to the bin directory and from it, the location of the Levitus file */
 			char dir[PATH_MAX + 1];
-			GMT_runtime_bindir_win32(dir);
+			gmt_runtime_bindir_win32(dir);
 			char *pch = strrchr(dir, '\\');
 			pch[0] = '\0';
 			strcat(dir, "\\share\\mbsystem\\LevitusAnnual82.dat");
