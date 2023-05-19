@@ -49,6 +49,16 @@ install (PROGRAMS
 	DESTINATION ${GMT_BINDIR}
 	COMPONENT Runtime)
 
+install (PROGRAMS
+	${VCRUNTIME_PATH}/vcruntime140.dll
+	${VCRUNTIME_PATH}/vcruntime140_1.dll
+	${VCRUNTIME_PATH}/msvcp140.dll
+	${VCRUNTIME_PATH}/msvcp140_1.dll
+	${VCRUNTIME_PATH}/msvcp140_2.dll
+	${VCRUNTIME_PATH}/msvcp140_codecvt_ids.dll
+	DESTINATION ${GMT_BINDIR}
+	COMPONENT Runtime)
+
 if (GDAL_DATA_PATH)
 	install (DIRECTORY ${GDAL_DATA_PATH}/
 		DESTINATION ${GMT_DATADIR}/GDAL_DATA
@@ -76,7 +86,7 @@ if (GMTMEX_PATH)
 		COMPONENT Runtime)
 endif (GMTMEX_PATH)
 
-install (PROGRAMS 
+install (PROGRAMS
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libX11.dll
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXcb.dll
 	C:/programs/compa_libs/X11/compileds/${VC}_${BITAGE}/lib/libXau.dll
@@ -146,8 +156,8 @@ install (PROGRAMS
 	${PATO_BIN}/mbtime.exe
 	${PATO_BIN}/mbvelocitytool.exe
 	${PATO_BIN}/velocity
-	${PATO_BIN}/xkeysymdb 
-	${PATO_BIN}/README_MB.txt 
+	${PATO_BIN}/xkeysymdb
+	${PATO_BIN}/README_MB.txt
 	DESTINATION ${GMT_BINDIR}
 	COMPONENT Runtime)
 
