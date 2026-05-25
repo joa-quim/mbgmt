@@ -1,5 +1,6 @@
 # List of extra  files to include in the installer
-SET (PATO_MB  "C:/progs_cygw/MB-Qt/compileds/${VC}_${BITAGE}")
+#SET (PATO_MB  "C:/progs_cygw/MB-Qt/compileds/${VC}_${BITAGE}")
+SET (PATO_MB  "${MB_ROOT}/compileds/${VC}_${BITAGE}")
 SET (PATO_BIN "${PATO_MB}/bin")
 SET (PATO_LIB "${PATO_MB}/bin")
 SET (PATO_GDAL_BIN  "C:/programs/compa_libs/gdal_GIT/compileds/${VC}_${BITAGE}/bin")

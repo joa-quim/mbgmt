@@ -51,8 +51,6 @@
 /* GMT5 header file */
 #include "gmt_dev.h"
 
-#define GMT_PROG_OPTIONS "->V"
-
 /* mbio include files */
 #include "mb_status.h"
 #include "mb_format.h"
@@ -856,7 +854,7 @@ int GMT_mbgrid_j (void *V_API, int mode, void *args) {
 #else
 	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
 #endif
-	if (GMT_Parse_Common (API, GMT_PROG_OPTIONS, options)) Return (API->error);
+	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);
                
 	Ctrl = New_mbgrid_Ctrl (GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options))) Return (error);

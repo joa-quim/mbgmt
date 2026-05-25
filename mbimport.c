@@ -20,8 +20,7 @@
  *
  */
 
-#define THIS_MODULE_CLASSIC_NAME	"mbimport"
-#define THIS_MODULE_MODERN_NAME	"mbimport"
+#define THIS_MODULE_NAME	"mbimport"
 #define THIS_MODULE_LIB		"mbgmt"
 #define THIS_MODULE_PURPOSE	"Plot swath bathymetry, amplitude, or backscatter"
 #define THIS_MODULE_KEYS	"<D{,CC(,NC(,MI}"
@@ -30,9 +29,6 @@
 
 /* GMT5 header file */
 #include "gmt_dev.h"
-
-
-EXTERN_MSC int GMT_mbimport(void *API, int mode, void *args);
 
 /* MBIO include files */
 #include "mb_status.h"
@@ -236,7 +232,7 @@ GMT_LOCAL int mbimport_plot_box(struct CTRL *Ctrl, double *x, double *y, double 
 GMT_LOCAL int mbimport_plot_point(struct CTRL *Ctrl, double x, double y, double *rgb, int *error);
 GMT_LOCAL int mbimport_ping_copy(int one, int two, struct swath_local *swath, int *error);
 
-static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
+static void *New_Ctrl(struct GMT_CTRL *GMT) {	/* Allocate and initialize a new control structure */
 	struct  CTRL *Ctrl;
 	int     status;
 	int     verbose = 0;
@@ -252,7 +248,7 @@ static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new 
 						 Ctrl->b.time_i, Ctrl->e.time_i, &Ctrl->S.speed, &Ctrl->T.timegap);
 
 	if (status == MB_FAILURE)
-		GMT_Report (GMT->parent, GMT_MSG_NORMAL, "Probable fatal error: failed to get current MB defaults.\n");
+		GMT_Report(GMT->parent, GMT_MSG_NORMAL, "Probable fatal error: failed to get current MB defaults.\n");
 
 	Ctrl->A.factor = 1.0;
 	Ctrl->A.mode = MBSWATH_FOOTPRINT_REAL;
@@ -283,7 +279,7 @@ static void *New_Ctrl (struct GMT_CTRL *GMT) {	/* Allocate and initialize a new 
 	return (Ctrl);
 }
 
-static void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate control structure */
+static void Free_Ctrl(struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate control structure */
 	if (!Ctrl) return;
 	if (Ctrl->C.cptfile) free (Ctrl->C.cptfile);
 	if (Ctrl->I.inputfile) free (Ctrl->I.inputfile);
@@ -291,8 +287,8 @@ static void Free_Ctrl (struct GMT_CTRL *GMT, struct CTRL *Ctrl) {	/* Deallocate 
 	gmt_M_free (GMT, Ctrl);
 }
 
-static int usage (struct GMTAPI_CTRL *API, int level) {
-	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_PURPOSE);
+static int usage(struct GMTAPI_CTRL *API, int level) {
+	gmt_show_name_and_purpose (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_PURPOSE);
 	if (level == GMT_MODULE_PURPOSE) return (GMT_NOERROR);
 	GMT_Message (API, GMT_TIME_NONE, "usage: mbimport -I<inputfile> %s\n", GMT_J_OPT);
 	GMT_Message (API, GMT_TIME_NONE, "\t[-A<factor>/<mode>/<depth>]\n");
@@ -303,8 +299,7 @@ static int usage (struct GMTAPI_CTRL *API, int level) {
 	GMT_Message (API, GMT_TIME_NONE, "\t[-I<inputfile>] [-L<lonflip>] [-N<cptfile>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[-S<speed>] [-T<timegap>] [-W] [-Z<mode>]\n");
 	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [-T] [%s] [%s]\n", GMT_Rgeo_OPT, GMT_U_OPT, GMT_V_OPT);
-	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s]\n\t[%s]\n [%s]\n\n", 
-									 GMT_X_OPT, GMT_Y_OPT, GMT_n_OPT, GMT_t_OPT);
+	GMT_Message (API, GMT_TIME_NONE, "\t[%s] [%s]\n\t[%s]\n [%s]\n\n", GMT_X_OPT, GMT_Y_OPT, GMT_n_OPT, GMT_t_OPT);
 
 	if (level == GMT_SYNOPSIS) return (EXIT_FAILURE);
 
@@ -324,7 +319,7 @@ static int usage (struct GMTAPI_CTRL *API, int level) {
 	return (EXIT_FAILURE);
 }
 
-static int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *options) {
+static int parse(struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *options) {
 	/* This parses the options provided to mbswath and sets parameters in Ctrl.
 	 * Note Ctrl has already been initialized and non-zero default values set.
 	 * Any GMT common options will override values set previously by other commands.
@@ -519,11 +514,11 @@ static int parse (struct GMT_CTRL *GMT, struct CTRL *Ctrl, struct GMT_OPTION *op
 		GMT->common.J.active = true;
 	}
 
-	n_errors += gmt_M_check_condition (GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
-	n_errors += gmt_M_check_condition (GMT, Ctrl->I.active && !Ctrl->I.inputfile,
-	                                   "Syntax error -I option: Must specify input file\n");
-	n_errors += gmt_M_check_condition (GMT, Ctrl->E.active && !Ctrl->E.device_dpi && Ctrl->E.dpi <= 0,
-									   "Syntax error -E option: dpi must be positive\n");
+	n_errors += gmt_M_check_condition(GMT, n_files != 1, "Syntax error: Must specify one input file(s)\n");
+	n_errors += gmt_M_check_condition(GMT, Ctrl->I.active && !Ctrl->I.inputfile,
+	                                  "Syntax error -I option: Must specify input file\n");
+	n_errors += gmt_M_check_condition(GMT, Ctrl->E.active && !Ctrl->E.device_dpi && Ctrl->E.dpi <= 0,
+									  "Syntax error -E option: dpi must be positive\n");
 
 	return (n_errors ? GMT_PARSE_ERROR : GMT_OK);
 }
@@ -574,12 +569,13 @@ int GMT_mbimport (void *V_API, int mode, void *args) {
 	/* Parse the command-line arguments */
 
 #if GMT_MAJOR_VERSION >= 6
-	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
+	if ((GMT = gmt_init_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, THIS_MODULE_KEYS, THIS_MODULE_NEEDS, NULL, &options, &GMT_cpy)) == NULL) bailout (API->error); /* Save current state */
 #else
-	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_CLASSIC_NAME, &GMT_cpy); /* Save current state */
+	GMT = gmt_begin_module (API, THIS_MODULE_LIB, THIS_MODULE_NAME, &GMT_cpy); /* Save current state */
 #endif
 	if (GMT_Parse_Common (API, THIS_MODULE_OPTIONS, options)) Return (API->error);
-	Ctrl = (struct CTRL *) New_Ctrl (GMT);	/* Allocate and initialize a new control structure */
+
+	Ctrl = (struct CTRL *) New_Ctrl(GMT);	/* Allocate and initialize a new control structure */
 	if ((error = parse (GMT, Ctrl, options))) Return (error);
 
 	/*---------------------------- This is the mbswath main code ----------------------------*/
